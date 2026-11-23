@@ -372,5 +372,13 @@ rep(' authLoading, googleUser, isBoundGoogleUser, loginWithGoogle, bindAndLogin,
     ' binding, lineProfileRef, squads, bindableMembers, bindForm, bindLoading, loadBindable, bootLine,'
     ' isSuperAdmin, currentSquadName, currentSquadIdRef, switchSquad, myRole,')
 
+# ---------------------------------------------------------------------
+# 7. 程式檔加上版本號，避免手機快取到「新網頁 + 舊程式」
+# ---------------------------------------------------------------------
+import time as _time
+_ver = _time.strftime('%Y%m%d%H%M')
+s = s.replace("from './js/store.js'", f"from './js/store.js?v={_ver}'")
+s = s.replace("from './js/auth.js'", f"from './js/auth.js?v={_ver}'")
+
 open(out_path, 'w', encoding='utf-8').write(s)
 print('OK', out_path, len(s))

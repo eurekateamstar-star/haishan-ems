@@ -2999,9 +2999,9 @@
 
 </div>
 <script type="module">
-    import * as Store from './js/store.js';
-    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js';
-    import { startAuth, logout as lineLogout } from './js/auth.js';
+    import * as Store from './js/store.js?v=202611232320';
+    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js?v=202611232320';
+    import { startAuth, logout as lineLogout } from './js/auth.js?v=202611232320';
 
     // 舊程式還會呼叫到的 Firebase 名稱，留空殼避免出錯
     const auth = { currentUser: null };
