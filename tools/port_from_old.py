@@ -213,6 +213,9 @@ rep('''                subscribeFCM(name);
                 await Store.refreshAll();
                 executeSystemLogin(b.name);
                 authLoading.value = false;
+                // 圖文選單的按鈕會帶 ?page=schedule / assistance，直接開到那一頁
+                const page = new URLSearchParams(location.search).get('page');
+                if (['dashboard', 'schedule', 'assistance'].includes(page)) currPage.value = page;
             };
             const bootLine = async () => {
                 authLoading.value = true;
