@@ -1,0 +1,6 @@
+db-uri = "postgres://authenticator@/ems?host=/tmp&port=5433"
+db-schemas = "public"
+db-anon-role = "anon"
+jwt-secret = "@/home/claude/pgrest/jwks.json"
+jwt-aud = "authenticated"
+server-port = 3001
