@@ -358,6 +358,13 @@ s = s.replace("第一大隊海山分隊${minguoYear}", "${currentSquadName.value
 s = s.replace("海山分隊${minguoYear}", "${currentSquadName.value}分隊${minguoYear}")
 
 # ---------------------------------------------------------------------
+# 5d. iPhone 的 LINE 內建瀏覽器沒有 navigator.serviceWorker，直接取用會讓整段初始化中斷
+# ---------------------------------------------------------------------
+s = s.replace("navigator.serviceWorker.controller", "navigator.serviceWorker?.controller")
+s = s.replace("navigator.serviceWorker.ready", "navigator.serviceWorker?.ready")
+s = s.replace("navigator.serviceWorker.register", "navigator.serviceWorker?.register")
+
+# ---------------------------------------------------------------------
 # 6. 回傳給畫面的變數
 # ---------------------------------------------------------------------
 rep(' authLoading, googleUser, isBoundGoogleUser, loginWithGoogle, bindAndLogin, unbindGoogleAccount,',

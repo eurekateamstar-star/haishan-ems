@@ -10,13 +10,17 @@ const path = require('path');
   const results = [];
   const ok = (c, m) => { results.push((c ? '✅ ' : '❌ ') + m); };
 
-  async function open(sub) {
+  async function open(sub, opts = {}) {
     const ctx = await browser.newContext({ viewport: { width: 420, height: 900 } });
     const page = await ctx.newPage();
     const errors = [];
     page.on('pageerror', e => errors.push('pageerror: ' + e.message));
     page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
     await page.addInitScript((s) => { window.__SUB = s; }, sub);
+    if (opts.noServiceWorker) await page.addInitScript(() => {
+      Object.defineProperty(Navigator.prototype, 'serviceWorker', { get: () => undefined, configurable: true });
+      try { delete Navigator.prototype.clearAppBadge; } catch (e) {}
+    });
     await page.route('**/*', async (route) => {
       const url = route.request().url();
       if (url.includes('unpkg.com/vue')) return route.fulfill({ body: vue, contentType: 'application/javascript' });
@@ -81,6 +85,18 @@ const path = require('path');
     const navText = await page.innerText('nav');
     ok(!navText.includes('常訓') && !navText.includes('考核') && navText.includes('首頁'), 'B5 底部只剩首頁、排班、協勤');
     ok(errors.length === 0, 'B6 沒有程式錯誤' + (errors.length ? '：' + errors.slice(0, 3).join(' | ') : ''));
+    await ctx.close();
+  }
+
+  // ---- E. 模擬 iPhone 的 LINE 內建瀏覽器（沒有 serviceWorker）
+  {
+    const { page, ctx, errors } = await open('U_member', { noServiceWorker: true });
+    const ok1 = await page.waitForFunction(() => document.querySelector('header')?.innerText.includes('王佩瑾'), null, { timeout: 15000 }).then(() => true).catch(() => false);
+    ok(ok1, 'E1 沒有 serviceWorker 的瀏覽器（iPhone LINE）也載入隊員名單，頁首有王佩瑾');
+    await page.click('nav >> text=排班').catch(() => {}); await page.waitForTimeout(800);
+    const b = await page.innerText('body');
+    ok(/17\s*-\s*21/.test(b), 'E2 排班資料也有載入');
+    ok(errors.length === 0, 'E3 沒有程式錯誤' + (errors.length ? '：' + errors.slice(0, 3).join(' | ') : ''));
     await ctx.close();
   }
 

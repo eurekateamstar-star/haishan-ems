@@ -4904,14 +4904,14 @@ bootLine();
                 if ('clearAppBadge' in navigator) {
                     navigator.clearAppBadge();
                 }
-                if (navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.controller.postMessage({ action: 'clearBadge' });
+                if (navigator.serviceWorker?.controller) {
+                    navigator.serviceWorker?.controller.postMessage({ action: 'clearBadge' });
                 }
                 document.addEventListener('visibilitychange', () => {
                     if (document.visibilityState === 'visible') {
                         if ('clearAppBadge' in navigator) navigator.clearAppBadge();
-                        if (navigator.serviceWorker.controller) {
-                            navigator.serviceWorker.controller.postMessage({ action: 'clearBadge' });
+                        if (navigator.serviceWorker?.controller) {
+                            navigator.serviceWorker?.controller.postMessage({ action: 'clearBadge' });
                         }
                     }
                 });
