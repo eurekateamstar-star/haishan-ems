@@ -373,6 +373,12 @@ rep(' authLoading, googleUser, isBoundGoogleUser, loginWithGoogle, bindAndLogin,
     ' isSuperAdmin, currentSquadName, currentSquadIdRef, switchSquad, myRole,')
 
 # ---------------------------------------------------------------------
+# 6b. 登入卡片上方的紅藍閃爍「警示燈」改成不閃的藍色細條（紅色閃爍容易被誤以為出錯）
+# ---------------------------------------------------------------------
+rep('<div class="siren-bar"><div class="siren-red"></div><div class="siren-blue"></div></div>',
+    '<div class="siren-bar" style="background:linear-gradient(90deg,#93c5fd,#2563eb);border-top-left-radius:32px;border-top-right-radius:32px;"></div>')
+
+# ---------------------------------------------------------------------
 # 7. 程式檔加上版本號，避免手機快取到「新網頁 + 舊程式」
 # ---------------------------------------------------------------------
 import time as _time

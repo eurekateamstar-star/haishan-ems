@@ -183,7 +183,7 @@
    <!-- 登入頁 -->
     <div v-if="currPage === 'login'" class="flex-1 flex flex-col justify-center p-6 fade-in relative" :style="{ paddingTop: 'var(--safe-top)' }">
         <div class="login-card rounded-[32px] w-full mx-auto max-w-[360px]">
-            <div class="siren-bar"><div class="siren-red"></div><div class="siren-blue"></div></div>
+            <div class="siren-bar" style="background:linear-gradient(90deg,#93c5fd,#2563eb);border-top-left-radius:32px;border-top-right-radius:32px;"></div>
             <div class="p-10 pt-16 pb-12">
                 <div class="login-title-box border-l-4 border-blue-500 pl-4 mb-10">
                     <h1 class="text-3xl font-black tracking-tight text-slate-800">EMS PLATFORM</h1>
@@ -2999,9 +2999,9 @@
 
 </div>
 <script type="module">
-    import * as Store from './js/store.js?v=202611232320';
-    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js?v=202611232320';
-    import { startAuth, logout as lineLogout } from './js/auth.js?v=202611232320';
+    import * as Store from './js/store.js?v=202611232323';
+    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js?v=202611232323';
+    import { startAuth, logout as lineLogout } from './js/auth.js?v=202611232323';
 
     // 舊程式還會呼叫到的 Firebase 名稱，留空殼避免出錯
     const auth = { currentUser: null };
