@@ -3065,12 +3065,21 @@
                 currentSquadIdRef.value = b.squad_id;
                 Store.initStore(sbClient, b.squad_id);
                 await Store.refreshAll();
+                // 手機網路慢時，隊員名單偶爾還沒到：再同步一次
+                if (!members.value.some(m => m.姓名 === b.name)) {
+                    await new Promise(r => setTimeout(r, 1200));
+                    await Store.refreshAll();
+                }
+                if (!members.value.some(m => m.姓名 === b.name)) {
+                    showAppAlert('error', '隊員資料讀取不完整', `已登入為 ${b.name}，但隊員名單沒有載入（目前 ${members.value.length} 人）。請關掉後重新開啟；若仍如此，請把這個畫面截圖給管理員。`);
+                }
                 executeSystemLogin(b.name);
                 authLoading.value = false;
                 // 圖文選單的按鈕會帶 ?page=schedule / assistance，直接開到那一頁
                 const page = new URLSearchParams(location.search).get('page');
                 if (['dashboard', 'schedule', 'assistance'].includes(page)) currPage.value = page;
             };
+            window.addEventListener('store-error', (e) => showAppAlert('error', '資料讀取失敗', e.detail));
             const bootLine = async () => {
                 authLoading.value = true;
                 binding.value = null;

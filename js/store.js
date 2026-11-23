@@ -185,7 +185,10 @@ function emit(name) {
 export function onSnapshot(ref, cb, onError) {
   const l = { ref, cb };
   listeners.push(l);
-  load(ref.name).then(() => emit(ref.name)).catch((e) => { console.error('讀取失敗', ref.name, e); onError?.(e); });
+  load(ref.name).then(() => emit(ref.name)).catch((e) => {
+    console.error('讀取失敗', ref.name, e); onError?.(e);
+    if (squadId != null) window.dispatchEvent(new CustomEvent('store-error', { detail: ref.name + '：' + e.message }));
+  });
   return () => { const i = listeners.indexOf(l); if (i >= 0) listeners.splice(i, 1); };
 }
 
