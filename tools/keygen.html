@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>登入金鑰產生器</title>
+<style>
+  :root { --bg:#f1f5f9; --card:#fff; --ink:#0f172a; --mute:#64748b; --line:#e2e8f0; --accent:#2563eb; --warn:#b91c1c; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif; padding:24px 16px; }
+  main { max-width:720px; margin:0 auto; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--mute); font-size:14px; margin:0 0 20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:14px; }
+  .warn { border-color:#fecaca; background:#fef2f2; color:var(--warn); font-size:14px; line-height:1.6; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:10px; padding:12px 18px; font-size:15px; font-weight:700; cursor:pointer; }
+  button.secondary { background:#fff; color:var(--accent); border:1px solid var(--accent); padding:8px 14px; font-size:13px; }
+  textarea { width:100%; min-height:130px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size:12px; border:1px solid var(--line); border-radius:10px; padding:10px; background:#f8fafc; color:var(--ink); resize:vertical; }
+  ol { padding-left:20px; line-height:1.8; font-size:14px; margin:8px 0 0; }
+  .row { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; }
+  .row b { font-size:15px; }
+  #result { display:none; }
+  code { background:#eef2ff; padding:1px 5px; border-radius:4px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>登入金鑰產生器</h1>
+  <p class="sub">在你自己的瀏覽器裡產生一組 ES256 金鑰，不會上傳到任何地方。</p>
+
+  <div class="card warn">
+    這把私鑰可以簽發任何人的登入憑證，請只貼到 <b>Supabase</b> 和 <b>Cloudflare Worker 的機密</b> 這兩個地方，
+    不要傳給任何人（包括 Claude），也不要存在雲端記事本。貼完後關掉這個頁面即可。
+  </div>
+
+  <div class="card">
+    <button id="gen">產生金鑰</button>
+  </div>
+
+  <div id="result">
+    <div class="card">
+      <div class="row"><b>私鑰（JWK）</b><button class="secondary" data-copy="priv">複製</button></div>
+      <textarea id="priv" readonly></textarea>
+      <ol>
+        <li>Supabase → <b>Project Settings → JWT Keys</b> → <b>Create Standby Key</b></li>
+        <li>演算法選 <b>ES256</b>，選 <b>Import an existing private key</b>，貼上這段，建立</li>
+        <li>在新金鑰右邊的「⋯」選 <b>Move to previously used</b>（只用來驗證，不影響 Supabase 自己的登入）</li>
+        <li>Cloudflare → Worker → <b>設定 → 變數和機密</b> → 新增，類型選 <b>機密 (Secret)</b>，名稱 <code>SUPABASE_JWT_PRIVATE_KEY</code>，值貼上同一段</li>
+      </ol>
+    </div>
+  </div>
+</main>
+<script>
+  document.getElementById('gen').addEventListener('click', async () => {
+    const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    const priv = await crypto.subtle.exportKey('jwk', kp.privateKey);
+    const kid = crypto.randomUUID();
+    const out = { kty: priv.kty, crv: priv.crv, x: priv.x, y: priv.y, d: priv.d, alg: 'ES256', use: 'sig', kid };
+    document.getElementById('priv').value = JSON.stringify(out);
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('gen').textContent = '重新產生（會換成另一把）';
+  });
+  document.querySelectorAll('[data-copy]').forEach(btn => btn.addEventListener('click', async () => {
+    const el = document.getElementById(btn.dataset.copy);
+    try { await navigator.clipboard.writeText(el.value); } catch (e) { el.select(); document.execCommand('copy'); }
+    btn.textContent = '已複製'; setTimeout(() => btn.textContent = '複製', 1500);
+  }));
+</script>
+</body>
+</html>
