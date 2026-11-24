@@ -139,6 +139,10 @@ for order, m in enumerate(data.get('members', [])):
     stats['members'] += 1
 
 
+# 舊資料裡打錯的姓名 → 正確姓名
+NAME_ALIAS = {'林宛宣': '林宛萱'}
+
+
 def known_member(name, what):
     if name in member_names:
         return True
@@ -194,7 +198,7 @@ for r in data.get('registrations', []):
     if r.get('taskId') not in task_ids:
         stats['skipped'] += 1
         continue  # 任務已被刪除的舊報名
-    name = r.get('userName')
+    name = NAME_ALIAS.get(r.get('userName'), r.get('userName'))
     if not known_member(name, '報名'):
         continue
     key = (r['taskId'], name)
@@ -215,7 +219,7 @@ for r in data.get('registrations', []):
 # 協勤紀錄與案件
 # ---------------------------------------------------------------------
 for r in data.get('assistance_records', []):
-    name, d = r.get('userName'), norm_date(r.get('date'))
+    name, d = NAME_ALIAS.get(r.get('userName'), r.get('userName')), norm_date(r.get('date'))
     ss, se = norm_time(r.get('shiftStart')), norm_time(r.get('shiftEnd'))
     if not d or not ss or not se:
         stats['skipped'] += 1
@@ -259,16 +263,38 @@ if isinstance(hist, str):
         hist = json.loads(hist)
     except json.JSONDecodeError:
         hist = []
+running = None
 for e in sorted(hist or [], key=lambda e: str(e.get('date', ''))):
     d = norm_date(e.get('date'))
     if not d:
         stats['skipped'] += 1
         continue
     item = e.get('item') or e.get('desc') or e.get('description') or e.get('name') or e.get('title') or '（未命名）'
+    if running is None:
+        # 第一筆：舊資料的期初結餘只寫在「結餘」欄（收支都是 0），
+        # 這裡補成前一天的一筆收入，讓總結餘和舊網站一致、又不算進今年的收入
+        running = 0
+        bal = e.get('balance')
+        opening = (num(bal) - (num(e.get('income')) - num(e.get('expense')))) if bal not in (None, '') else 0
+        if opening:
+            import datetime as _dt
+            prev = (_dt.date.fromisoformat(d) - _dt.timedelta(days=1)).isoformat()
+            is_carry = not num(e.get('income')) and not num(e.get('expense'))
+            lines.append(
+                'insert into fund_entries (squad_id, date, item, income, expense, note) values ('
+                f"{squad_sql}, {q(prev)}, {q(item if is_carry else '期初結餘')}, {opening if opening > 0 else 0}, {-opening if opening < 0 else 0}, {q('由舊系統結餘轉入')});")
+            stats['fund'] += 1
+            running = opening
+            if is_carry:
+                continue
+    running += num(e.get('income')) - num(e.get('expense'))
     lines.append(
         'insert into fund_entries (squad_id, date, item, income, expense, note) values ('
         f"{squad_sql}, {q(d)}, {q(item)}, {num(e.get('income'))}, {num(e.get('expense'))}, {q(e.get('note') or e.get('remark'))});")
     stats['fund'] += 1
+
+if running is not None and fin.get('squad_fund') not in (None, '') and running != num(fin.get('squad_fund')):
+    warnings.append(f'零用金：匯入後結餘 {running}，舊網站顯示 {num(fin.get("squad_fund"))}，請核對')
 
 lines.append('commit;')
 lines.append('select ' + ', '.join(f"{v} as {k}" for k, v in stats.items()) + ';')
