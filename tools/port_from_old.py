@@ -42,7 +42,8 @@ def rep_between(start, end, new, keep_end=True):
 # 1. <head>：標題、LIFF SDK、設定值、停用推播
 # ---------------------------------------------------------------------
 rep('<title>海山救護義消平台</title>', '<title>救護義消協勤平台</title>')
-rep_between('    <script>\n        const FCM_VAPID_KEY', '    <style>', '''    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+rep_between('    <script>\n        const FCM_VAPID_KEY', '    <style>', '''    <style>[v-cloak]{display:none !important;}</style>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
         // ===== 新系統設定 =====
         window.APP_CONFIG = {
@@ -89,14 +90,14 @@ rep_between('                <!-- 狀態 1：檢查登入狀態中 (自動秒登
                 </div>
 
                 <!-- 狀態 2：帳號已停用 -->
-                <div v-else-if="binding && binding.status === 'suspended'" class="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center">
+                <div v-cloak v-else-if="binding && binding.status === 'suspended'" class="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center">
                     <i class="fa-solid fa-user-lock text-3xl text-rose-400 mb-3"></i>
                     <p class="text-sm font-black text-rose-600">{{ binding.name }} 的帳號已停用</p>
                     <p class="text-[11px] font-bold text-rose-400 mt-2">請聯絡分隊幹部</p>
                 </div>
 
                 <!-- 狀態 3：第一次使用，綁定隊員身分 -->
-                <div v-else-if="binding && binding.status === 'unbound'" class="space-y-3 text-left">
+                <div v-cloak v-else-if="binding && binding.status === 'unbound'" class="space-y-3 text-left">
                     <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 mb-2 flex items-center gap-3">
                         <img v-if="lineProfileRef?.picture" :src="lineProfileRef.picture" class="w-9 h-9 rounded-full" alt="">
                         <div><p class="text-[10px] font-black text-emerald-600">已用 LINE 登入</p><p class="text-xs font-bold text-slate-700">{{ lineProfileRef?.name }}</p></div>
@@ -133,7 +134,7 @@ rep_between('                <!-- 狀態 1：檢查登入狀態中 (自動秒登
                 </div>
 
                 <!-- 狀態 4：登入失敗 -->
-                <div v-else class="text-center space-y-4">
+                <div v-cloak v-else class="text-center space-y-4">
                     <p class="text-sm font-bold text-slate-500">無法登入，請確認網路後重試</p>
                     <button @click="bootLine" class="med-btn w-full py-4 font-black">重新登入</button>
                 </div>
@@ -371,6 +372,13 @@ rep(' authLoading, googleUser, isBoundGoogleUser, loginWithGoogle, bindAndLogin,
     ' authLoading, googleUser, isBoundGoogleUser, loginWithGoogle, bindAndLogin, unbindGoogleAccount,'
     ' binding, lineProfileRef, squads, bindableMembers, bindForm, bindLoading, loadBindable, bootLine,'
     ' isSuperAdmin, currentSquadName, currentSquadIdRef, switchSquad, myRole,')
+
+# ---------------------------------------------------------------------
+# 6c. 提示 / 確認視窗在 Vue 啟動前先隱藏，避免開啟時閃出紅色錯誤框與 {{ }} 原始碼
+# ---------------------------------------------------------------------
+for _k in ('appAlert', 'appConfirm'):
+    rep(f'<div class="bottom-sheet-overlay" :class="{{ active: {_k}.show }}"', f'<div v-cloak class="bottom-sheet-overlay" :class="{{ active: {_k}.show }}"')
+    rep(f'<div class="bottom-sheet" :class="{{ active: {_k}.show }}"', f'<div v-cloak class="bottom-sheet" :class="{{ active: {_k}.show }}"')
 
 # ---------------------------------------------------------------------
 # 7. 程式檔加上版本號，避免手機快取到「新網頁 + 舊程式」

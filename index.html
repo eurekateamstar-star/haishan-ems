@@ -14,6 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>[v-cloak]{display:none !important;}</style>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
         // ===== 新系統設定 =====
@@ -198,14 +199,14 @@
                 </div>
 
                 <!-- 狀態 2：帳號已停用 -->
-                <div v-else-if="binding && binding.status === 'suspended'" class="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center">
+                <div v-cloak v-else-if="binding && binding.status === 'suspended'" class="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center">
                     <i class="fa-solid fa-user-lock text-3xl text-rose-400 mb-3"></i>
                     <p class="text-sm font-black text-rose-600">{{ binding.name }} 的帳號已停用</p>
                     <p class="text-[11px] font-bold text-rose-400 mt-2">請聯絡分隊幹部</p>
                 </div>
 
                 <!-- 狀態 3：第一次使用，綁定隊員身分 -->
-                <div v-else-if="binding && binding.status === 'unbound'" class="space-y-3 text-left">
+                <div v-cloak v-else-if="binding && binding.status === 'unbound'" class="space-y-3 text-left">
                     <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 mb-2 flex items-center gap-3">
                         <img v-if="lineProfileRef?.picture" :src="lineProfileRef.picture" class="w-9 h-9 rounded-full" alt="">
                         <div><p class="text-[10px] font-black text-emerald-600">已用 LINE 登入</p><p class="text-xs font-bold text-slate-700">{{ lineProfileRef?.name }}</p></div>
@@ -242,7 +243,7 @@
                 </div>
 
                 <!-- 狀態 4：登入失敗 -->
-                <div v-else class="text-center space-y-4">
+                <div v-cloak v-else class="text-center space-y-4">
                     <p class="text-sm font-bold text-slate-500">無法登入，請確認網路後重試</p>
                     <button @click="bootLine" class="med-btn w-full py-4 font-black">重新登入</button>
                 </div>
@@ -2964,8 +2965,8 @@
 <!-- 👇👇 把彈窗貼在這裡，這樣不管有沒有登入都能呼叫它 👇👇 -->
     
     <!-- 自訂全域提醒彈窗 (App Alert Modal) -->
-    <div class="bottom-sheet-overlay" :class="{ active: appAlert.show }" @click="appAlert.show = false"></div>
-    <div class="bottom-sheet" :class="{ active: appAlert.show }" style="z-index: 1000 !important;">
+    <div v-cloak class="bottom-sheet-overlay" :class="{ active: appAlert.show }" @click="appAlert.show = false"></div>
+    <div v-cloak class="bottom-sheet" :class="{ active: appAlert.show }" style="z-index: 1000 !important;">
         <div class="text-center py-6">
             <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
                  :class="appAlert.type === 'success' ? 'bg-emerald-50' : 'bg-rose-50'">
@@ -2982,8 +2983,8 @@
     </div>
 
     <!-- 自訂全域確認彈窗 (App Confirm Modal) -->
-    <div class="bottom-sheet-overlay" :class="{ active: appConfirm.show }" @click="appConfirm.show = false"></div>
-    <div class="bottom-sheet" :class="{ active: appConfirm.show }" style="z-index: 1000 !important;">
+    <div v-cloak class="bottom-sheet-overlay" :class="{ active: appConfirm.show }" @click="appConfirm.show = false"></div>
+    <div v-cloak class="bottom-sheet" :class="{ active: appConfirm.show }" style="z-index: 1000 !important;">
         <div class="text-center py-4">
             <div class="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fa-solid fa-circle-question text-3xl text-amber-500"></i>
@@ -2999,9 +3000,9 @@
 
 </div>
 <script type="module">
-    import * as Store from './js/store.js?v=202611232326';
-    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js?v=202611232326';
-    import { startAuth, logout as lineLogout } from './js/auth.js?v=202611232326';
+    import * as Store from './js/store.js?v=202611241054';
+    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js?v=202611241054';
+    import { startAuth, logout as lineLogout } from './js/auth.js?v=202611241054';
 
     // 舊程式還會呼叫到的 Firebase 名稱，留空殼避免出錯
     const auth = { currentUser: null };
@@ -3034,12 +3035,36 @@
             const authLoading = ref(true); 
             const googleUser = ref(null);  
             const showLoginPassword = ref(false); // 控制登入密碼是否顯示
+            // 🌟 搬家用：管理員開啟 ?export=1，匯出全部資料成 JSON 檔（給新系統匯入）
+            const exportAllForMigration = async () => {
+                try {
+                    const out = { exported_at: new Date().toISOString() };
+                    for (const c of ['members', 'shifts', 'official_tasks', 'meeting_tasks', 'registrations', 'assistance_records']) {
+                        const snap = await getDocs(collection(db, c));
+                        out[c] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    }
+                    const fin = await getDoc(doc(db, 'finance', 'squad_fund'));
+                    out.finance = fin.exists() ? fin.data() : null;
+                    const json = JSON.stringify(out, (k, v) => (v && typeof v.toDate === 'function') ? v.toDate().toISOString() : v);
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+                    a.download = '海山資料匯出_' + getTodayStr() + '.json';
+                    document.body.appendChild(a); a.click(); a.remove();
+                    showAppAlert('success', '匯出完成', `隊員 ${out.members.length}、排班 ${out.shifts.length}、公差 ${out.official_tasks.length}、會議 ${out.meeting_tasks.length}、報名 ${out.registrations.length}、協勤 ${out.assistance_records.length} 筆`);
+                } catch (e) {
+                    showAppAlert('error', '匯出失敗', e.message);
+                }
+            };
+
             const executeSystemLogin = (name) => {
                 if (loginUserName.value === name && currPage.value !== 'login') return; // 已登入，避免重複執行
                 try { if (googleUser.value?.uid) localStorage.setItem('haishan_login_' + googleUser.value.uid, name); } catch(e) {}
                 loginUserName.value = name;
                 processNews();
                 currPage.value = 'dashboard';
+                if (new URLSearchParams(location.search).get('export') === '1') {
+                    setTimeout(() => { if (isAdmin.value) exportAllForMigration(); else showAppAlert('error', '無法匯出', '只有管理員可以匯出資料'); }, 2500);
+                }
                 myAssistanceRecords.value = allAssistanceRecords.value.filter(r => r.userName === name);
             };
 
