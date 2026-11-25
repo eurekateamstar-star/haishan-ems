@@ -64,6 +64,7 @@ function memberToDoc(r) {
     join_date: r.join_date || '', emt_level: r.emt_level || '', emt_expiry: r.emt_expiry || '',
     honor_expiry: r.honor_expiry || '', duty_count: r.duty_count || 0, sort_order: r.sort_order,
     uid: r.bound_at ? 'line' : '', line_display_name: r.line_display_name || '', line_picture_url: r.line_picture_url || '',
+    bound_at: r.bound_at || '',
     ...(r.extra || {}),
   };
   for (const [k, v] of Object.entries(r.medals || {})) d['medal_' + k.replace(/[- \n]+/g, '')] = v;
@@ -214,7 +215,7 @@ export async function refreshAll() {
 const MEMBER_COLS = ['squad_id', 'birthday', 'duty_group', 'duty_title', 'is_suspended', 'join_date', 'emt_level',
   'emt_expiry', 'honor_expiry', 'duty_count', 'sort_order'];
 const IGNORED_MEMBER_FIELDS = new Set(['password', 'id_no', 'email', 'uid', 'pushSubscription', 'id', 'is_super_admin',
-  'line_display_name', 'line_picture_url', 'timestamp']);
+  'line_display_name', 'line_picture_url', 'bound_at', 'timestamp']);
 const dateOrNull = (v) => (v ? String(v).slice(0, 10) : null);
 
 async function memberPatch(data, current) {

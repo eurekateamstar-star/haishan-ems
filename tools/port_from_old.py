@@ -381,6 +381,134 @@ for _k in ('appAlert', 'appConfirm'):
     rep(f'<div class="bottom-sheet" :class="{{ active: {_k}.show }}"', f'<div v-cloak class="bottom-sheet" :class="{{ active: {_k}.show }}"')
 
 # ---------------------------------------------------------------------
+# 6d. 主控台：推播訂閱燈號 / Google 綁定 → LINE 頭貼與 LINE 綁定狀態
+# ---------------------------------------------------------------------
+LINE_AVATAR = lambda m, size, rounded: (
+    f'<img v-if="{m}.line_picture_url" :src="{m}.line_picture_url" referrerpolicy="no-referrer" '
+    f'class="{size} {rounded} object-cover shadow-sm border-2" :class="{m}.is_suspended ? \'border-slate-200 grayscale\' : \'border-[#06C755]\'" alt="">')
+
+# 九宮格：右上角燈號
+rep('''                <span v-else class="w-2.5 h-2.5 rounded-full shadow-sm" :class="m.hasSub ? 'bg-emerald-400' : 'bg-rose-400'"></span>
+                <span v-if="m.hasBind && !m.is_suspended" class="w-3 h-3 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-sm" style="font-size: 7px;"><i class="fa-brands fa-google"></i></span>''',
+'''                <span v-else-if="m.hasBind" class="w-4 h-4 rounded-full bg-[#06C755] text-white flex items-center justify-center shadow-sm" style="font-size: 9px;" title="LINE 已綁定"><i class="fa-brands fa-line"></i></span>
+                <span v-else class="text-[8px] bg-slate-100 text-slate-400 px-1 py-0.5 rounded font-black border border-slate-200">未綁定</span>''')
+
+# 九宮格：頭像
+rep('''            <div class="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black shadow-sm mb-2"
+                 :class="m.is_suspended ? 'bg-slate-200 text-slate-500' : (m.hasSub ? 'bg-blue-100 text-blue-600' : 'bg-white text-slate-400 border border-slate-200')">
+                {{ m.姓名.charAt(0) }}
+            </div>''',
+'''            <div class="mb-2">
+                ''' + LINE_AVATAR('m', 'w-12 h-12', 'rounded-full') + '''
+                <div v-else class="w-12 h-12 rounded-full flex items-center justify-center text-lg font-black shadow-sm"
+                     :class="m.is_suspended ? 'bg-slate-200 text-slate-500' : (m.hasBind ? 'bg-green-50 text-[#06C755] border border-green-200' : 'bg-white text-slate-300 border border-dashed border-slate-300')">
+                    {{ m.姓名.charAt(0) }}
+                </div>
+            </div>''')
+
+# 人員面板：頭像
+rep('''                        <div class="w-12 h-12 rounded-[16px] flex items-center justify-center text-xl font-black shadow-sm"
+                             :class="adminSelectedMember.hasSub ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-rose-50 text-rose-600 border border-rose-100'">
+                            {{ adminSelectedMember.姓名.charAt(0) }}
+                        </div>''',
+'''                        ''' + LINE_AVATAR('adminSelectedMember', 'w-12 h-12', 'rounded-[16px]') + '''
+                        <div v-else class="w-12 h-12 rounded-[16px] flex items-center justify-center text-xl font-black shadow-sm"
+                             :class="adminSelectedMember.hasBind ? 'bg-green-50 text-[#06C755] border border-green-200' : 'bg-slate-50 text-slate-400 border border-slate-200'">
+                            {{ adminSelectedMember.姓名.charAt(0) }}
+                        </div>''')
+
+# 人員面板：狀態列（拿掉推播，只留 LINE 綁定）
+rep_between('''                        <span class="push-indicator" :class="adminSelectedMember.hasSub ? 'push-ok' : 'push-fail'">''',
+'''                    </div>
+
+                    <!-- 本週活動 -->''',
+'''                        <span v-if="adminSelectedMember.hasBind" class="push-indicator bg-green-50 text-[#06C755] border border-green-200">
+                            <i class="fa-brands fa-line" style="font-size:11px"></i> LINE 已綁定<template v-if="adminSelectedMember.line_display_name">：{{ adminSelectedMember.line_display_name }}</template>
+                        </span>
+                        <span v-else class="push-indicator bg-slate-200 text-slate-500">
+                            <i class="fa-brands fa-line" style="font-size:11px"></i> LINE 未綁定
+                        </span>
+                        <span v-if="adminSelectedMember.bound_at" class="text-[10px] font-bold text-slate-400">綁定於 {{ String(adminSelectedMember.bound_at).slice(0, 10) }}</span>
+''')
+
+# 人員面板：拿掉推播按鈕
+rep_between('''                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 px-1">通知與設定</p>
+                        <div class="flex gap-2">''',
+'''                        <button @click="openAdminEditMember(adminSelectedMember); isAdminMemberMenuOpen = false"''',
+'''                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 px-1">設定</p>
+''')
+
+# 編輯隊員：Google 綁定區 → LINE 綁定
+rep('''            <span><i class="fa-brands fa-google mr-1 text-red-500"></i>Google 帳號綁定</span>''',
+    '''            <span><i class="fa-brands fa-line mr-1 text-[#06C755]"></i>LINE 帳號綁定</span>''')
+rep('''                <div v-if="adminEditForm.email" class="flex justify-between items-center bg-white border border-slate-200 p-2.5 rounded-xl">
+                    <div class="flex flex-col overflow-hidden mr-2">
+                        <span class="text-[9px] font-black text-slate-400 uppercase">已綁定帳號</span>
+                        <span class="text-sm font-bold text-slate-700 truncate">{{ adminEditForm.email }}</span>
+                    </div>''',
+'''                <div v-if="adminEditForm.uid" class="flex justify-between items-center bg-white border border-slate-200 p-2.5 rounded-xl">
+                    <div class="flex items-center gap-2 overflow-hidden mr-2">
+                        <img v-if="adminEditForm.line_picture_url" :src="adminEditForm.line_picture_url" referrerpolicy="no-referrer" class="w-9 h-9 rounded-full object-cover border-2 border-[#06C755] shrink-0" alt="">
+                        <div class="flex flex-col overflow-hidden">
+                            <span class="text-[9px] font-black text-slate-400 uppercase">已綁定 LINE</span>
+                            <span class="text-sm font-bold text-slate-700 truncate">{{ adminEditForm.line_display_name || '（未提供名稱）' }}</span>
+                        </div>
+                    </div>''')
+rep('''<span class="text-xs font-bold">尚未綁定任何 Google 帳號</span>''',
+    '''<span class="text-xs font-bold">尚未綁定 LINE，隊員第一次登入時用生日驗證綁定</span>''')
+rep('''                    uid:          m.uid || '',
+''', '''                    uid:          m.uid || '',
+                    line_display_name: m.line_display_name || '',
+                    line_picture_url:  m.line_picture_url || '',
+''')
+rep('''                        adminEditForm.value.email = '';
+''', '''                        adminEditForm.value.email = '';
+                        adminEditForm.value.line_display_name = '';
+                        adminEditForm.value.line_picture_url = '';
+''')
+
+# 統計卡與篩選
+rep('''                                    <div class="admin-stat-label">已訂閱推播</div>
+                                    <div class="admin-stat-value text-emerald-600">{{ adminStats.subCount }}</div>''',
+'''                                    <div class="admin-stat-label">LINE 已綁定</div>
+                                    <div class="admin-stat-value text-[#06C755]">{{ adminStats.subCount }}</div>''')
+rep('''                                    <div class="admin-stat-label">未訂閱</div>''', '''                                    <div class="admin-stat-label">尚未綁定</div>''')
+rep('''                                    <div class="admin-stat-label">昨日推播失敗</div>
+                                    <div class="admin-stat-value text-amber-500">{{ adminStats.failCount }}</div>''',
+'''                                    <div class="admin-stat-label">停用</div>
+                                    <div class="admin-stat-value text-slate-500">{{ adminStats.failCount }}</div>''')
+rep('''                subCount:     adminMembersData.value.filter(m => m.hasSub).length,
+                noSubCount:   adminMembersData.value.filter(m => !m.hasSub).length,''',
+'''                subCount:     adminMembersData.value.filter(m => m.hasBind && !m.is_suspended).length,
+                noSubCount:   adminMembersData.value.filter(m => !m.hasBind && !m.is_suspended).length,''')
+rep('''                failCount:    adminMembersData.value.filter(m => m.pushResult === 'fail').length,''',
+    '''                failCount:    adminMembersData.value.filter(m => m.is_suspended).length,''')
+rep('''                { key: 'nosub',    label: '未訂閱' },
+                { key: 'hasact',   label: '本周有活動' },
+                { key: 'pushfail', label: '昨日失敗' },
+                { key: 'pushok',   label: '昨日成功' },''',
+'''                { key: 'nosub',    label: '未綁定' },
+                { key: 'pushok',   label: '已綁定' },
+                { key: 'hasact',   label: '本周有活動' },''')
+rep('''                    if (adminFilter.value === 'nosub')    return !m.hasSub;''', '''                    if (adminFilter.value === 'nosub')    return !m.hasBind && !m.is_suspended;''')
+rep('''                    if (adminFilter.value === 'pushok')   return m.pushResult === 'sent';''', '''                    if (adminFilter.value === 'pushok')   return m.hasBind;''')
+
+
+# 主控台：推播已移除，標題與按鈕跟著調整
+rep('''<h3 class="text-xl font-black text-slate-800">推播主控台</h3>''', '''<h3 class="text-xl font-black text-slate-800">隊員主控台</h3>''')
+rep('''    <button @click="openBatchPushModal" class="flex-1 py-3.5 rounded-2xl bg-slate-800 text-white font-black text-[13px] shadow-lg shadow-slate-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+        <i class="fa-solid fa-bullhorn"></i>
+        自訂群體推播
+    </button>
+    <button @click="openAddMemberModal" class="shrink-0 w-[52px] rounded-2xl''',
+'''    <button @click="openAddMemberModal" class="flex-1 py-3.5 gap-2 text-[13px] rounded-2xl''')
+rep('''        <i class="fa-solid fa-user-plus text-lg"></i>
+    </button>''', '''        <i class="fa-solid fa-user-plus text-lg"></i> 新增隊員
+    </button>''')
+rep('''>PUSH NOTIFICATION ADMIN</p>''', '''>MEMBER ADMIN</p>''')
+rep('''推播紀錄依昨日 <span class="font-black text-slate-600">push_logs</span> 判斷。''', '''右上角綠色 LINE 標記代表已綁定。''')
+
+# ---------------------------------------------------------------------
 # 7. 程式檔加上版本號，避免手機快取到「新網頁 + 舊程式」
 # ---------------------------------------------------------------------
 import time as _time
