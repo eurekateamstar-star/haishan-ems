@@ -798,13 +798,14 @@
                     </button>
                 </div>
                 <button v-if="dutyShortage" class="pbanner" style="--bc:#e11d48" @click="openSchedTab(visibleScheduleTabs.findIndex(t => t.id === 'duty_reg'))"><span class="ic"><i class="fa-solid fa-bullhorn"></i></span><span class="flex-1">公差「{{ dutyShortage.title }}」還缺 {{ dutyShortage.lack }} 人</span><i class="fa-solid fa-chevron-right text-xs text-slate-300"></i></button>
-                <section v-if="pendingTasks.length" class="pcard psec">
-                    <div class="hd"><span>還沒登記的公差・會議</span><span class="font-num text-xs font-black text-slate-400">{{ pendingTasks.length }} 場</span></div>
+                <section class="pcard psec">
+                    <div class="hd"><span>還沒登記的公差・會議</span><span v-if="pendingTasks.length" class="font-num text-xs font-black text-slate-400">{{ pendingTasks.length }} 場</span></div>
                     <button v-for="p in pendingTasks.slice(0, 6)" :key="'pd' + p.t.id" class="prow w-full text-left" @click="goTask(p)">
                         <span class="ic" :style="{ background: p.c + '14', color: p.c }"><i :class="p.kind === 'duty' ? 'fa-solid fa-clipboard-check' : 'fa-solid fa-users-rectangle'"></i></span>
                         <div class="min-w-0 flex-1"><div class="t truncate">{{ p.t.title }}</div><div class="s font-num">{{ p.t.date.split('-')[1] }}/{{ p.t.date.split('-')[2] }}（{{ getWeekday(p.t.date).replace('週', '') }}）{{ p.t.startTime }}・{{ p.kind === 'duty' ? '公差' : '會議' }}</div></div>
                         <span class="v" :style="{ fontSize: '12px', color: '#fff', background: p.c, padding: '5px 9px', borderRadius: '9px' }">{{ p.kind === 'duty' ? '去報名' : '去填寫' }}</span>
                     </button>
+                    <div v-if="!pendingTasks.length" class="flex items-center gap-3 py-3"><span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-check"></i></span><span class="text-[13px] font-bold text-slate-400">目前沒有需要登記的公差或會議</span></div>
                 </section>
            </div>
            <div v-show="schedView !== 'home'" class="pcrumb pg-green-acc"><span class="pemb sm g-green"><i class="fa-solid fa-calendar-days"></i></span><b>排班</b><span class="s">/ {{ (visibleScheduleTabs.find(t => t.id === activeScheduleTab) || {}).name }}</span></div>
