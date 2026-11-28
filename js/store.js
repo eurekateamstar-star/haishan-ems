@@ -19,6 +19,8 @@ let squadId = null;     // 目前分隊
 const cache = {};       // collectionName -> [{ id, data }]
 const listeners = [];   // { ref, cb }
 let membersRows = [];   // 目前分隊的隊員（供姓名 ↔ id 對照）
+let membersInFlight = false;
+let membersReady = Promise.resolve(); // 其他表要等隊員名單到了，才能把 member_id 換成姓名
 
 export function initStore(client, currentSquadId) {
   sb = client;
@@ -83,6 +85,7 @@ const LOADERS = {
   },
   async shifts() {
     const rows = check(await sb.from('shifts').select('*').eq('squad_id', squadId));
+    await membersReady;
     return rows.map((r) => ({ id: r.id, data: {
       name: memberName(r.member_id), start: r.start_hour, end: r.end_hour, date: r.date, timestamp: r.created_at, ...(r.extra || {}) } }));
   },
@@ -90,6 +93,7 @@ const LOADERS = {
   async meeting_tasks() { return loadTasks('meeting'); },
   async registrations() {
     const rows = check(await sb.from('registrations').select('*, tasks!inner(squad_id, kind)').eq('tasks.squad_id', squadId));
+    await membersReady;
     return rows.map((r) => ({ id: r.id, data: {
       taskId: r.task_id, userName: memberName(r.member_id), type: r.tasks.kind === 'duty' ? 'duty' : 'meeting',
       status: r.status, diet: r.diet, plusAdult: r.plus_adult, plusChild: r.plus_child,
@@ -98,6 +102,7 @@ const LOADERS = {
   async assistance_records() {
     const rows = check(await sb.from('assistance_records').select('*, assistance_cases(*)').eq('squad_id', squadId)
       .order('date', { ascending: false }));
+    await membersReady;
     return rows.map((r) => ({ id: r.id, data: {
       userName: memberName(r.member_id), date: r.date, shiftStart: hhmm(r.shift_start), shiftEnd: hhmm(r.shift_end),
       recordType: r.record_type, timestamp: r.created_at, ...(r.extra || {}),
@@ -117,6 +122,7 @@ const LOADERS = {
 
 async function loadTasks(kind) {
   const rows = check(await sb.from('tasks').select('*').eq('squad_id', squadId).eq('kind', kind));
+  await membersReady;
   return rows.map((r) => ({ id: r.id, data: {
     title: r.title, date: r.date, startTime: r.start_time || '', endTime: r.end_time || '', location: r.location || '',
     note: r.note || '', quota: r.quota, category: r.category || (kind === 'meeting' ? '一般會議' : ''),
@@ -129,8 +135,11 @@ async function load(name, force = false) {
   if (EMPTY_COLLECTIONS.has(name) || name.startsWith('training_data_') || !LOADERS[name] || squadId == null) {
     cache[name] = [];
   } else {
-    if (name !== 'members' && !membersRows.length && LOADERS.members) cache.members = await LOADERS.members();
-    cache[name] = await LOADERS[name]();
+    if (name !== 'members' && !membersRows.length && !membersInFlight && LOADERS.members) cache.members = await LOADERS.members();
+    const sq = squadId;
+    const items = await LOADERS[name]();
+    if (sq !== squadId) return cache[name] || []; // 讀取途中切換了分隊：舊分隊的資料丟掉
+    cache[name] = items;
   }
   return cache[name];
 }
@@ -203,10 +212,24 @@ export async function refresh(name) {
   // 刪除公差 / 會議時，資料庫會一併刪掉報名
   if ((name === 'official_tasks' || name === 'meeting_tasks') && cache.registrations) { await load('registrations', true); emit('registrations'); }
 }
-export async function refreshAll() {
-  const names = [...new Set(listeners.map((l) => l.ref.name))];
-  cache.members = await LOADERS.members(); emit('members');
-  for (const n of names) if (n !== 'members') { await load(n, true); emit(n); }
+// 重新讀取所有有人在監聽的集合。
+//   隊員名單和其他表「同時」發出請求（其他表拿到資料後才等隊員名單來對照姓名），
+//   不再一張讀完才讀下一張。
+//   opts.background：這些集合不等它，在背景讀完再更新畫面（例如資料量大的協勤紀錄）
+export async function refreshAll(opts = {}) {
+  const background = new Set(opts.background || []);
+  const names = [...new Set(listeners.map((l) => l.ref.name))].filter((n) => n !== 'members');
+  membersInFlight = true;
+  const membersJob = LOADERS.members().then((rows) => { cache.members = rows; emit('members'); })
+    .finally(() => { membersInFlight = false; });
+  membersReady = membersJob.catch(() => {}); // 隊員名單失敗由下面的 Promise.all 回報，其他表不跟著卡住
+  const loadOne = (n) => load(n, true).then(() => emit(n));
+  const reportBg = (n) => (e) => {
+    console.error('讀取失敗', n, e);
+    window.dispatchEvent(new CustomEvent('store-error', { detail: n + '：' + e.message }));
+  };
+  for (const n of names) if (background.has(n)) loadOne(n).catch(reportBg(n));
+  await Promise.all([membersJob, ...names.filter((n) => !background.has(n)).map(loadOne)]);
 }
 
 // ---------------------------------------------------------------------

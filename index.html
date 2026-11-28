@@ -3067,9 +3067,9 @@
 
 </div>
 <script type="module">
-    import * as Store from './js/store.js?v=202611281206';
-    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js?v=202611281206';
-    import { startAuth, logout as lineLogout } from './js/auth.js?v=202611281206';
+    import * as Store from './js/store.js?v=202611281245';
+    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js?v=202611281245';
+    import { startAuth, logout as lineLogout } from './js/auth.js?v=202611281245';
 
     // 舊程式還會呼叫到的 Firebase 名稱，留空殼避免出錯
     const auth = { currentUser: null };
@@ -3156,11 +3156,12 @@
                 myRole.value = b.role;
                 currentSquadIdRef.value = b.squad_id;
                 Store.initStore(sbClient, b.squad_id);
-                await Store.refreshAll();
-                // 手機網路慢時，隊員名單偶爾還沒到：再同步一次
+                // 所有表同時讀；協勤紀錄資料量最大，不等它，先進首頁，讀完畫面會自己更新
+                await Store.refreshAll({ background: ['assistance_records'] });
+                // 手機網路慢時，隊員名單偶爾還沒到：只重讀隊員名單一次
                 if (!members.value.some(m => m.姓名 === b.name)) {
                     await new Promise(r => setTimeout(r, 1200));
-                    await Store.refreshAll();
+                    await Store.refresh('members');
                 }
                 if (!members.value.some(m => m.姓名 === b.name)) {
                     showAppAlert('error', '隊員資料讀取不完整', `已登入為 ${b.name}，但隊員名單沒有載入（目前 ${members.value.length} 人）。請關掉後重新開啟；若仍如此，請把這個畫面截圖給管理員。`);
@@ -3179,10 +3180,10 @@
                     const { sb, profile } = await startAuth(window.APP_CONFIG);
                     sbClient = sb;
                     lineProfileRef.value = profile;
-                    const { data, error } = await sb.rpc('my_binding');
+                    // 綁定狀態和分隊清單同時讀
+                    const [{ data, error }] = await Promise.all([sb.rpc('my_binding'), loadSquads()]);
                     if (error) throw new Error(error.message);
                     binding.value = data;
-                    await loadSquads();
                     if (data.status === 'bound') { await enterApp(data); return; }
                 } catch (e) {
                     console.error(e);
