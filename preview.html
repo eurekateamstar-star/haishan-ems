@@ -806,18 +806,18 @@
                             <div v-if="schedSelDay" class="ui-card p-4 mb-3 space-y-3">
                                 <div class="flex justify-between items-center"><span class="text-[15px] font-black text-slate-800">{{ schedSelDay.fullDate.slice(5).replace('-', '/') }}（{{ String(schedSelDay.weekday).replace('週', '') }}）</span><span class="text-xs font-bold text-slate-500">{{ (userShifts[schedSelDay.fullDate] || []).length }} 人登記</span></div>
                                 <div v-if="hasShift(schedSelDay.fullDate)" class="gantt">
-                                    <div class="gaxis"><span v-for="h in [0, 6, 12, 18, 24]" :key="'t' + h" :style="{ left: (h / 24 * 100) + '%' }">{{ String(h).padStart(2, '0') }}</span></div>
+                                    <div class="gaxis"><span v-for="h in [8, 12, 16, 20, 24]" :key="'t' + h" :style="{ left: ((h - DUTY_START) / DUTY_SPAN * 100) + '%' }">{{ String(h).padStart(2, '0') }}</span></div>
                                     <div v-for="s in [...(userShifts[schedSelDay.fullDate] || [])].sort((a, b) => Number(a.start) - Number(b.start))" :key="s.name" class="grow" :class="{ me: s.name === userData.姓名 }">
                                         <span class="gname">{{ s.name }}</span>
                                         <div class="gtrack">
-                                            <i v-for="h in [0,2,4,6,8,10,12,14,16,18,20,22,24]" :key="'g' + h" class="gline" :class="{ major: h % 6 === 0 }" :style="{ left: (h / 24 * 100) + '%' }"></i>
+                                            <i v-for="h in [8,10,12,14,16,18,20,22,24]" :key="'g' + h" class="gline" :class="{ major: h % 4 === 0 }" :style="{ left: ((h - DUTY_START) / DUTY_SPAN * 100) + '%' }"></i>
                                             <span class="gbar" :style="ganttBar(s)"></span>
                                             <span class="glbl" :style="ganttLabel(s)">{{ String(s.start).padStart(2, '0') }}–{{ String(s.end).padStart(2, '0') }}</span>
                                         </div>
                                     </div>
-                                    <div class="gcover"><b>涵蓋</b><div class="trk"><span v-for="c in schedDayCover" :key="'c' + c[0]" :style="{ left: (c[0] / 24 * 100) + '%', width: ((c[1] - c[0]) / 24 * 100) + '%' }"></span></div></div>
+                                    <div class="gcover"><b>涵蓋</b><div class="trk"><span v-for="c in schedDayCover" :key="'c' + c[0]" :style="{ left: ((c[0] - DUTY_START) / DUTY_SPAN * 100) + '%', width: ((c[1] - c[0]) / DUTY_SPAN * 100) + '%' }"></span></div></div>
                                     <div v-if="schedDayGaps.length" class="ggaps"><span v-for="g in schedDayGaps" :key="g">{{ g }} 沒人</span></div>
-                                    <div v-else class="ggaps ok"><span>24 小時都有人</span></div>
+                                    <div v-else class="ggaps ok"><span>08–24 都有人</span></div>
                                 </div>
                                 <p v-else class="text-[13px] font-bold text-slate-400">{{ isPastDate(schedSelDay.fullDate) ? '這天已過，沒有排班紀錄' : '這天還沒有人登記' }}</p>
                                 <button v-if="!isPastDate(schedSelDay.fullDate) && !isMyShift(schedSelDay.fullDate)" class="ui-btn" @click="openShiftModal(schedSelDay)">登記這天的排班</button>
@@ -846,7 +846,7 @@
                                 <div v-for="w in ['一','二','三','四','五','六','日']" :key="w" class="calendar-day-header">{{w}}</div>
                                 <div v-for="(cell, idx) in calendarCells" :key="idx" class="calendar-cell" :class="{ 'other-month': !cell.currentMonth, 'today': cell.isToday }">
                                     <span class="day-num">{{ cell.day }}</span>
-                                    <div class="mt-1 flex flex-col gap-0.5"><span v-for="s in getShiftsForCell(cell.fullDate).slice(0,2)" :key="s.name" class="cname">{{ s.name }}</span><span v-if="getShiftsCount(cell.fullDate) > 2" class="cmore">+{{ getShiftsCount(cell.fullDate) - 2 }}</span></div>
+                                    <div class="mt-1 flex flex-col gap-0.5"><span v-for="s in getShiftsForCell(cell.fullDate).slice(0,4)" :key="s.name" class="cname">{{ s.name }}</span><span v-if="getShiftsCount(cell.fullDate) > 4" class="cmore">+{{ getShiftsCount(cell.fullDate) - 4 }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -7426,15 +7426,16 @@ const goToConfirmStep = (onlyShift = false) => {
             };
             const emtDaysLeft = computed(() => calculateDays(String(displayEmtExpiry.value || '').replace(/\//g, '-')));
 
-            const ganttRange = (sh) => { const a = Number(sh.start) || 0; let b = Number(sh.end) || 0; if (b <= a) b = 24; return [a, Math.min(b, 24)]; };
-            const ganttBar = (sh) => { const [a, b] = ganttRange(sh); return { left: (a / 24 * 100) + '%', width: ((b - a) / 24 * 100) + '%' }; };
-            const ganttLabel = (sh) => { const [a] = ganttRange(sh); return a > 20 ? { right: '0' } : { left: (a / 24 * 100) + '%' }; };
+            const DUTY_START = 8, DUTY_END = 24, DUTY_SPAN = DUTY_END - DUTY_START;
+            const ganttRange = (sh) => { let a = Number(sh.start) || 0; let b = Number(sh.end) || 0; if (b <= a) b = 24; a = Math.max(a, DUTY_START); b = Math.min(b, DUTY_END); if (b < a) b = a; return [a, b]; };
+            const ganttBar = (sh) => { const [a, b] = ganttRange(sh); return { left: ((a - DUTY_START) / DUTY_SPAN * 100) + '%', width: ((b - a) / DUTY_SPAN * 100) + '%' }; };
+            const ganttLabel = (sh) => { const [a] = ganttRange(sh); return a > 21 ? { right: '0' } : { left: ((a - DUTY_START) / DUTY_SPAN * 100) + '%' }; };
             const schedDayCover = computed(() => {
                 const d = schedSelDay.value; if (!d) return [];
                 const cover = new Array(24).fill(false);
                 for (const sh of (userShifts.value[d.fullDate] || [])) { const [a, b] = ganttRange(sh); for (let h = a; h < b; h++) cover[h] = true; }
                 const out = []; let st = null;
-                for (let h = 0; h <= 24; h++) { if (h < 24 && cover[h]) { if (st === null) st = h; } else if (st !== null) { out.push([st, h]); st = null; } }
+                for (let h = DUTY_START; h <= DUTY_END; h++) { if (h < DUTY_END && cover[h]) { if (st === null) st = h; } else if (st !== null) { out.push([st, h]); st = null; } }
                 return out;
             });
             const schedDayGaps = computed(() => {
@@ -7442,14 +7443,14 @@ const goToConfirmStep = (onlyShift = false) => {
                 const cover = new Array(24).fill(false);
                 for (const sh of (userShifts.value[d.fullDate] || [])) { const [a, b] = ganttRange(sh); for (let h = a; h < b; h++) cover[h] = true; }
                 const out = []; let st = null;
-                for (let h = 0; h <= 24; h++) {
-                    if (h < 24 && !cover[h]) { if (st === null) st = h; }
+                for (let h = DUTY_START; h <= DUTY_END; h++) {
+                    if (h < DUTY_END && !cover[h]) { if (st === null) st = h; }
                     else if (st !== null) { out.push(String(st).padStart(2, '0') + '–' + String(h).padStart(2, '0')); st = null; }
                 }
                 return out;
             });
             return {
-                ganttBar, ganttLabel, schedDayGaps, schedDayCover,
+                ganttBar, ganttLabel, schedDayGaps, schedDayCover, DUTY_START, DUTY_SPAN,
                 schedView, assistView, rescueView, tabTint, openSchedTab, openAssistTab, openRescueTab, myWeekShiftCount, nextMyShift, nextMyShiftDate, nextMyShiftTime, upcomingDutyCount, upcomingMeetingCount, dutyShortage, recentMyRecords, hours_between_ui, emtDaysLeft,
                 schedSel, schedSelDay,
                 UI_ICONS, dashView, walletFront, hideNums, walletOrder, myHours, walletStyle, walletTappable, walletTap, walletRight, dashFuncs, goDashHome, openDashFunc, certReminder, topCases,
