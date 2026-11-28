@@ -306,6 +306,8 @@
         .tk .rs .a{font-size:10px;font-weight:800}.tk .rs .v{font-family:Inter,sans-serif;font-weight:800;font-size:16px;color:#0f172a}
         .tk .fill{display:flex;justify-content:space-between;font-size:11px;font-weight:800;color:#8a94a6}.tk .fill b{font-family:Inter,sans-serif;color:#0f172a}
         .tk.ended .stub{background:#94a3b8}.tk.ended{opacity:.72}
+        .tk.flash{animation:tkflash 1.6s ease}@keyframes tkflash{0%,40%{box-shadow:0 0 0 3px var(--c),0 10px 22px -18px rgba(15,23,42,.35)}100%{box-shadow:0 1px 2px rgba(15,23,42,.04),0 10px 22px -18px rgba(15,23,42,.35)}}
+        .pend-h{font-size:11px;font-weight:800;color:#8a94a6;padding:10px 0 2px}
         .tlempty{background:#fff;border-radius:18px;border:1px dashed #e2e8f0;padding:22px;text-align:center;font-size:13px;font-weight:800;color:#94a3b8}
         /* ===== 新版（質感版） ===== */
         html, body, #app, header.bg-\[\#f1f5f9\], .tabs-section{background-color:#f3f5f9!important}
@@ -789,6 +791,14 @@
                         <span class="text-[13px] font-bold text-slate-400 flex-1">本週還沒有登記任何排班、公差或會議</span>
                         <button class="text-xs font-black text-white bg-emerald-600 px-3 py-2 rounded-xl" @click="openSchedTab(0)">去登記</button>
                     </div>
+                    <template v-if="pendingTasks.length">
+                        <div class="pend-h">還沒登記・{{ pendingTasks.length }} 場</div>
+                        <button v-for="p in pendingTasks.slice(0, 6)" :key="'pd' + p.t.id" class="prow w-full text-left" @click="goTask(p)">
+                            <span class="ic" :style="{ background: p.c + '14', color: p.c }"><i :class="p.kind === 'duty' ? 'fa-solid fa-clipboard-check' : 'fa-solid fa-users-rectangle'"></i></span>
+                            <div class="min-w-0 flex-1"><div class="t truncate">{{ p.t.title }}</div><div class="s font-num">{{ p.t.date.split('-')[1] }}/{{ p.t.date.split('-')[2] }}（{{ getWeekday(p.t.date).replace('週', '') }}）{{ p.t.startTime }}・{{ p.kind === 'duty' ? '公差' : '會議' }}</div></div>
+                            <span class="v" :style="{ fontSize: '12px', color: '#fff', background: p.c, padding: '5px 9px', borderRadius: '9px' }">{{ p.kind === 'duty' ? '去報名' : '去填寫' }}</span>
+                        </button>
+                    </template>
                 </section>
            </div>
            <div v-show="schedView !== 'home'" class="pcrumb pg-green-acc"><span class="pemb sm g-green"><i class="fa-solid fa-calendar-days"></i></span><b>排班</b><span class="s">/ {{ (visibleScheduleTabs.find(t => t.id === activeScheduleTab) || {}).name }}</span></div>
@@ -905,7 +915,7 @@
                                 <div v-if="!dutyLanes.length" class="tlempty">目前沒有公差任務</div>
                                 <section v-for="L in dutyLanes" :key="L.k" class="tlane" :style="{ '--lc': L.c }">
                                     <div class="lh"><span class="dot"></span><span class="t">{{ L.t }}</span><span class="n">{{ L.items.length }}</span><span class="h">{{ L.h }}</span></div>
-                                    <div v-for="t in L.items" :key="t.id" class="tk" :class="{ ended: L.k === 'done' }" style="--c:#e11d48">
+                                    <div v-for="t in L.items" :key="t.id" :id="'tk-' + t.id" class="tk" :class="{ ended: L.k === 'done', flash: tkFlash === t.id }" style="--c:#e11d48">
                                         <div class="stub"><span class="k">公差</span><span class="d">{{ t.date.split('-')[1] }}/{{ t.date.split('-')[2] }}</span><span class="w">{{ getWeekday(t.date) }}</span></div><div class="perf"></div><span class="notch t"></span><span class="notch b"></span>
                                         <div v-if="isAdmin" class="adm"><button @click.stop="openEditTaskModal(t, 'duty')" aria-label="編輯"><i class="fa-solid fa-pen-to-square"></i></button><button @click.stop="confirmDeleteTask(t, 'duty')" aria-label="刪除"><i class="fa-solid fa-trash-can"></i></button></div>
                                         <div class="bd">
@@ -938,7 +948,7 @@
                                 <div v-if="!meetingLanes.length" class="tlempty">目前沒有會議或聚餐</div>
                                 <section v-for="L in meetingLanes" :key="L.k" class="tlane" :style="{ '--lc': L.c }">
                                     <div class="lh"><span class="dot"></span><span class="t">{{ L.t }}</span><span class="n">{{ L.items.length }}</span><span class="h">{{ L.h }}</span></div>
-                                    <div v-for="t in L.items" :key="t.id" class="tk" :class="{ ended: L.k === 'done' }" style="--c:#7c3aed">
+                                    <div v-for="t in L.items" :key="t.id" :id="'tk-' + t.id" class="tk" :class="{ ended: L.k === 'done', flash: tkFlash === t.id }" style="--c:#7c3aed">
                                         <div class="stub"><span class="k">會議</span><span class="d">{{ t.date.split('-')[1] }}/{{ t.date.split('-')[2] }}</span><span class="w">{{ getWeekday(t.date) }}</span></div><div class="perf"></div><span class="notch t"></span><span class="notch b"></span>
                                         <div v-if="isAdmin" class="adm"><button @click.stop="openEditTaskModal(t, 'meeting')" aria-label="編輯"><i class="fa-solid fa-pen-to-square"></i></button><button @click.stop="confirmDeleteTask(t, 'meeting')" aria-label="刪除"><i class="fa-solid fa-trash-can"></i></button></div>
                                         <div class="bd">
@@ -4574,6 +4584,18 @@ const openEmtRecordModal = () => {
                 });
                 return L.filter(x => x.items.length);
             });
+            const tkFlash = ref(null);
+            const pendingTasks = computed(() => {
+                const out = [];
+                filteredOfficialTasks.value.forEach(t => { if (!isExpired(t.date) && !isUserSignedUp(t.id) && getTaskRegCount(t.id) < t.quota) out.push({ t, kind: 'duty', c: '#e11d48' }); });
+                filteredMeetingTasks.value.forEach(t => { if (!isExpired(t.date) && !isUserSignedUp(t.id)) out.push({ t, kind: 'meeting', c: '#7c3aed' }); });
+                return out.sort((a, b) => (a.t.date + a.t.startTime).localeCompare(b.t.date + b.t.startTime));
+            });
+            const goTask = (p) => {
+                const i = visibleScheduleTabs.value.findIndex(x => x.id === (p.kind === 'duty' ? 'duty_reg' : 'meeting'));
+                openSchedTab(i);
+                setTimeout(() => { const el = document.getElementById('tk-' + p.t.id); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); tkFlash.value = null; nextTick(() => { tkFlash.value = p.t.id; }); setTimeout(() => { if (tkFlash.value === p.t.id) tkFlash.value = null; }, 1800); } }, 350);
+            };
             const meetingLanes = computed(() => {
                 const L = [{ k: 'todo', t: '需要你處理', c: '#7c3aed', h: '還沒填出席調查', items: [] }, { k: 'filled', t: '已填寫', c: '#059669', h: '可以再修改', items: [] }, { k: 'done', t: '已結束', c: '#cbd5e1', h: '', items: [] }];
                 filteredMeetingTasks.value.forEach(t => {
@@ -7485,7 +7507,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 currentWeekStart, weekDates, currentWeekRangeText, changeWeek, hasShift, isPastDate, hourOptions,
                 isShiftModalOpen, isDeleteShiftModalOpen, selectedDay, tempStartTime, tempEndTime, isHourDisabled, isMyShift, userShifts,
                 currentCalendarDate, calendarTitle, calendarCells, changeCalendarMonth, getShiftsForCell, getShiftsCount, getWeekday,
-                officialTasks, meetingTasks, filteredOfficialTasks, filteredMeetingTasks, dutyLanes, meetingLanes, isPostModalOpen, postType, newTask, postToLine, isFillingTraining, fillMonthlyTraining,
+                officialTasks, meetingTasks, filteredOfficialTasks, filteredMeetingTasks, dutyLanes, meetingLanes, pendingTasks, goTask, tkFlash, isPostModalOpen, postType, newTask, postToLine, isFillingTraining, fillMonthlyTraining,
                     editingTaskId, sendEditPush, openEditTaskModal, 
                     openPostTaskModal, handlePostTask, handleDeleteTask, getTaskRegCount, getTaskParticipants, isUserSignedUp, toggleRegistration,
                 isMeetingRegModalOpen, regForm, openMeetingRegModal, submitMeetingReg, currentTask, getMeetingSummary, getDetailedRegs, getCategoryClass, isExpired, getFillingCount,
