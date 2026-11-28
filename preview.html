@@ -583,6 +583,27 @@
         .yp-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;max-height:42vh;overflow-y:auto}
         .yp-grid button{all:unset;cursor:pointer;text-align:center;padding:10px 0;border-radius:11px;border:1px solid #e2e8f0;font-family:Inter,sans-serif;font-size:15px;font-weight:800;color:#334155}
         .yp-grid button.on{background:#c2410c;border-color:#c2410c;color:#fff}
+        .org{align-items:stretch}
+        .org-lv{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+        .org-n{all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 14px;border-radius:14px;background:#fff;border:1.5px solid #e2e8f0;min-width:92px}
+        .org-n small{font-size:10px;font-weight:900;color:#94a3b8}.org-n b{font-size:15px;font-weight:900;color:#0f172a}
+        .org-n.top{background:linear-gradient(135deg,#0b2a7a,#2563eb);border:0}.org-n.top small{color:#bfdbfe}.org-n.top b{color:#fff;font-size:17px}
+        .org-n.mid{border-color:#93c5fd;background:#eff6ff}.org-n.mid small{color:#2563eb}
+        .org-n.empty{cursor:default;opacity:.6}
+        .org-v{width:2px;height:14px;background:#cbd5e1;margin:0 auto}
+        .org-staff{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;align-items:center;margin-top:8px;padding:8px;border-radius:14px;background:#f8fafc;border:1px dashed #cbd5e1}
+        .org-staff .lb{font-size:10px;font-weight:900;color:#94a3b8;margin-right:2px}
+        .org-staff button{all:unset;cursor:pointer;display:flex;align-items:baseline;gap:3px;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:4px 8px}
+        .org-staff b{font-size:12px;font-weight:900;color:#0f172a}.org-staff small{font-size:10px;font-weight:800;color:#64748b}
+        .org-bus{height:2px;background:#cbd5e1;margin:0 calc(50% / var(--n))}
+        .org-cols{display:grid;gap:6px}
+        .org-sq{position:relative;display:flex;flex-direction:column;gap:5px;align-items:stretch;padding-top:12px}
+        .org-sq:before{content:'';position:absolute;top:0;left:50%;width:2px;height:12px;background:#cbd5e1}
+        .org-sqh{text-align:center;font-size:12px;font-weight:900;color:#fff;background:#0f766e;border-radius:10px;padding:6px 0}.org-sqh em{font-style:normal;font-size:10px;opacity:.8;margin-left:3px}
+        .org-n.ld{min-width:0;padding:6px 4px;border-color:#99f6e4;background:#f0fdfa}.org-n.ld small{color:#0f766e}.org-n.ld b{font-size:13px}
+        .org-mem{display:flex;flex-direction:column;gap:3px;background:#fff;border:1px solid #e7eaf0;border-radius:12px;padding:5px}
+        .org-mem button{all:unset;cursor:pointer;text-align:center;font-size:12px;font-weight:800;color:#334155;padding:4px 0;border-radius:7px}
+        .org-mem button:nth-child(odd){background:#f8fafc}
         .ov-none{font-size:12px;font-weight:700;color:#cbd5e1;margin-top:6px}
         .ov-row{display:flex;align-items:center;gap:10px;cursor:pointer}
         .ov-nm{width:70px;flex-shrink:0}.ov-nm b{display:block;font-size:14px;font-weight:900;color:#0f172a}.ov-nm small{font-size:10px;font-weight:800;color:#94a3b8}
@@ -1263,7 +1284,7 @@
         <div v-else-if="currPage === 'console'" class="dashboard-wrapper fade-in">
             <div class="con-page">
                 <button class="con-back" @click="currPage = mePrevPage || 'dashboard'"><i class="fa-solid fa-arrow-left"></i>返回</button>
-                <div v-if="isAdmin" class="ov-seg"><button v-for="v in ['隊員', '獎章', '證照', '時數']" :key="v" :class="{ on: conView === v }" @click="conView = v">{{ v }}</button></div>
+                <div v-if="isAdmin" class="ov-seg"><button v-for="v in ['隊員', '組織', '獎章', '證照', '時數']" :key="v" :class="{ on: conView === v }" @click="conView = v">{{ v }}</button></div>
                 <!-- 全員：獎章 -->
                 <div v-if="isAdmin && conView === '獎章'" class="ov-wrap">
                     <div class="ov-hd"><b>全員獎章</b><span class="ov-tg"><button :class="{ on: ovMedalBy === 'table' }" @click="ovMedalBy = 'table'">表格</button><button :class="{ on: ovMedalBy === 'medal' }" @click="ovMedalBy = 'medal'">依獎章</button><button :class="{ on: ovMedalBy === 'person' }" @click="ovMedalBy = 'person'">依人員</button></span></div>
@@ -1298,6 +1319,28 @@
                             <em class="ov-n">{{ p.list.length }}</em>
                         </section>
                     </template>
+                </div>
+                <!-- 組織圖 -->
+                <div v-if="isAdmin && conView === '組織'" class="ov-wrap org">
+                    <div class="ov-hd"><b>分隊組織圖</b><small>{{ ovMembers.length }} 人・點名字進個人編輯</small></div>
+                    <div class="org-lv">
+                        <button v-for="m in orgTree.chief" :key="m.姓名" class="org-n top" @click="memOpen(m)"><small>分隊長</small><b>{{ m.姓名 }}</b></button>
+                        <div v-if="!orgTree.chief.length" class="org-n top empty"><small>分隊長</small><b>未設定</b></div>
+                    </div>
+                    <div class="org-v"></div>
+                    <div class="org-lv">
+                        <button v-for="m in orgTree.deputy" :key="m.姓名" class="org-n mid" @click="memOpen(m)"><small>副分隊長</small><b>{{ m.姓名 }}</b></button>
+                    </div>
+                    <div v-if="orgTree.staff.length" class="org-staff"><span class="lb">幹部</span><button v-for="m in orgTree.staff" :key="m.姓名" @click="memOpen(m)"><b>{{ m.姓名 }}</b><small>{{ m.duty_title }}</small></button></div>
+                    <div class="org-v"></div>
+                    <div class="org-bus" :style="{ '--n': orgTree.squads.length }"></div>
+                    <div class="org-cols" :style="{ gridTemplateColumns: 'repeat(' + orgTree.squads.length + ', minmax(0,1fr))' }">
+                        <section v-for="sq in orgTree.squads" :key="sq.name" class="org-sq">
+                            <div class="org-sqh">{{ sq.name }}<em>{{ sq.all }}人</em></div>
+                            <button v-for="m in sq.lead" :key="m.姓名" class="org-n ld" @click="memOpen(m)"><small>{{ m.duty_title }}</small><b>{{ m.姓名 }}</b></button>
+                            <div v-if="sq.members.length" class="org-mem"><button v-for="m in sq.members" :key="m.姓名" @click="memOpen(m)">{{ m.姓名 }}</button></div>
+                        </section>
+                    </div>
                 </div>
                 <!-- 全員：證照 -->
                 <div v-if="isAdmin && conView === '證照'" class="ov-wrap">
@@ -7408,6 +7451,20 @@ const handleTimeInput = (item, field, formType) => {
             const conView = ref('隊員'), ovMedalBy = ref('table'), ovCertFilter = ref('全部');
             const ovMedalVal = (m, mId) => { const k = Object.keys(m).find((x) => x.startsWith('medal_') && mId.split(/[- \n]+/).every((p) => x.includes(p))); const v = k ? m[k] : ''; return v && v !== '無' ? String(v) : ''; };
             const ovMembers = computed(() => adminMembersData.value.filter((m) => !m.is_suspended));
+            const orgTree = computed(() => {
+                const all = ovMembers.value, T = (m) => m.duty_title || '隊員';
+                const chief = all.filter((m) => T(m) === '分隊長'), deputy = all.filter((m) => T(m) === '副分隊長');
+                const used = new Set([...chief, ...deputy].map((m) => m.姓名));
+                const staff = all.filter((m) => !used.has(m.姓名) && (m.duty_group === '幹部' || !m.duty_group));
+                staff.forEach((m) => used.add(m.姓名));
+                const names = [...new Set(all.filter((m) => !used.has(m.姓名)).map((m) => m.duty_group))].sort((a, b) => '一二三四五六七八九'.indexOf(a[1]) - '一二三四五六七八九'.indexOf(b[1]));
+                ['第一小隊', '第二小隊', '第三小隊'].forEach((n) => { if (!names.includes(n)) names.push(n); });
+                names.sort((a, b) => '一二三四五六七八九'.indexOf(a[1]) - '一二三四五六七八九'.indexOf(b[1]));
+                const rank = { '小隊長': 0, '副小隊長': 1 };
+                const squads = names.map((n) => { const ms = all.filter((m) => !used.has(m.姓名) && m.duty_group === n);
+                    return { name: n, all: ms.length, lead: ms.filter((m) => T(m) in rank).sort((a, b) => rank[T(a)] - rank[T(b)]), members: ms.filter((m) => !(T(m) in rank)) }; });
+                return { chief, deputy, staff, squads };
+            });
             const ROC_NOW = new Date().getFullYear() - 1911;
             const ypYears = Array.from({ length: ROC_NOW - 84 }, (_, i) => ROC_NOW - i);
             const yp = ref(null), ypPick = ref(''), ypSaving = ref(false);
@@ -8177,7 +8234,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 openAdminDeleteActivity, adminDeleteableActivities, confirmAdminDeleteAct, executeAdminDeleteAct,isMemberHistoryModalOpen, selectedDutyMember, openMemberDutyHistory, selectedMemberDutyHistory,
                 
                 // 協勤專屬
-                assistanceStep, assistanceForm, afTried, afConfirm, afHours, conView, yp, ypPick, ypSaving, ypYears, ypOpen, ypDone, ovEditMedal, ovMedalBy, OV_GROUPS, ovMedalCols, ovMedalVal, ovMembers, ovCertFilter, ovMedals, ovMedalPeople, ovCerts, ovHours, ovHoursMax, meMenu, bindNeedId, meAvatar, meAvatarBad, meOpenConsole, mePrevPage, MEM_TABS, memTab, memSecret, memSecretErr, memOpen, memLeft, memHistKeys, memHistTotal, memHistPct, memSave, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
+                assistanceStep, assistanceForm, afTried, afConfirm, afHours, conView, orgTree, yp, ypPick, ypSaving, ypYears, ypOpen, ypDone, ovEditMedal, ovMedalBy, OV_GROUPS, ovMedalCols, ovMedalVal, ovMembers, ovCertFilter, ovMedals, ovMedalPeople, ovCerts, ovHours, ovHoursMax, meMenu, bindNeedId, meAvatar, meAvatarBad, meOpenConsole, mePrevPage, MEM_TABS, memTab, memSecret, memSecretErr, memOpen, memLeft, memHistKeys, memHistTotal, memHistPct, memSave, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
                 isAssistTimeModalOpen, assistTempStart, assistTempEnd, openAssistTimeModal, selectAssistHour, resetAssistTimeSelection, confirmAssistTime, isAssistHourDisabled,
                 activeAssistTab, visibleAssistTabs, assistSlider, assistTabsScrollRef, scrollToAssistTab, onAssistSliderScroll, dynamicMemberHours,displayEmtExpiry,exportPaymentRequestToExcel,
                 myAssistanceRecords, allAssistanceRecords, isAssistEditModalOpen, editingAssistRecord, openAssistEditModal, submitAssistEdit, deleteAssistRecord, handleTimeInput,
