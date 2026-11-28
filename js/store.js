@@ -365,7 +365,7 @@ export async function setDoc(ref, data) {
 export async function updateDoc(ref, data) {
   switch (ref.name) {
     case 'members': {
-      const current = membersRows.find((m) => m.id === ref.id);
+      const current = membersRows.find((m) => String(m.id) === String(ref.id));
       const row = await memberPatch(data, current);
       if (Object.keys(row).length) check(await withoutMissingId(row, (r) => sb.from('members').update(r).eq('id', ref.id)));
       break;
