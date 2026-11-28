@@ -325,6 +325,21 @@
         .ebk .gloss{position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.28) 0%,rgba(255,255,255,0) 35%,rgba(255,255,255,0) 70%,rgba(255,255,255,.1))}
         .ebk .lbl{position:absolute;left:0;right:0;bottom:0;padding:22px 12px 10px 16px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.65));color:#fff}
         .ebk .lbl b{display:block;font-size:15px;font-weight:900}.ebk .lbl span{font-size:10px;opacity:.85}
+
+        .tl{position:relative;padding-top:2px}
+        .tl-node{display:flex;gap:12px}
+        .tl-node .t{width:46px;text-align:right;font-family:Inter,sans-serif;font-weight:800;font-size:13px;color:#334155;padding-top:1px}
+        .tl-node .rail{display:flex;flex-direction:column;align-items:center}
+        .tl-node .rail i{width:13px;height:13px;border-radius:7px;background:#fff;border:3px solid #10b981;margin-top:3px;box-sizing:border-box;box-shadow:0 0 0 3px rgba(16,185,129,.12)}
+        .tl-node .rail b{flex:1;width:2px;background:linear-gradient(180deg,#a7f3d0,#e5e7eb);margin:3px 0;border-radius:1px}
+        .tl-node:last-child .rail b{display:none}
+        .tl-node .body{flex:1;padding-bottom:14px}
+        .tl-node .nm{font-size:15px;font-weight:900;color:#0f172a}
+        .tl-node .tm{font-size:12px;color:#64748b;margin-top:1px;font-family:Inter,sans-serif;font-weight:600}
+        .tl-node .bar{height:6px;border-radius:3px;background:#f1f5f9;margin-top:6px;position:relative;overflow:hidden}
+        .tl-node .bar span{position:absolute;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#065f46,#10b981)}
+        .tl-node.me .rail i{background:#10b981}
+        .tl-node.me .nm{color:#047857}
 </style>
 </head>
 <body>
@@ -741,7 +756,17 @@
                             </div>
                             <div v-if="schedSelDay" class="ui-card p-4 mb-3 space-y-3">
                                 <div class="flex justify-between items-center"><span class="text-[15px] font-black text-slate-800">{{ schedSelDay.fullDate.slice(5).replace('-', '/') }}（{{ String(schedSelDay.weekday).replace('週', '') }}）</span><span class="text-xs font-bold text-slate-500">{{ (userShifts[schedSelDay.fullDate] || []).length }} 人登記</span></div>
-                                <div v-if="hasShift(schedSelDay.fullDate)" class="flex flex-wrap gap-1.5"><span v-for="s in (userShifts[schedSelDay.fullDate] || [])" :key="s.name" class="text-xs font-black px-2.5 py-1.5 rounded-lg" :class="s.name === userData.姓名 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'">{{ s.name }} {{ s.start }}-{{ s.end }}</span></div>
+                                <div v-if="hasShift(schedSelDay.fullDate)" class="tl">
+                                    <div v-for="s in [...(userShifts[schedSelDay.fullDate] || [])].sort((a, b) => Number(a.start) - Number(b.start))" :key="s.name" class="tl-node" :class="{ me: s.name === userData.姓名 }">
+                                        <div class="t">{{ String(s.start).padStart(2, '0') }}:00</div>
+                                        <div class="rail"><i></i><b></b></div>
+                                        <div class="body">
+                                            <div class="nm">{{ s.name }}<span v-if="s.name === userData.姓名" class="ml-1.5 text-[10px] font-black text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded align-middle">我</span></div>
+                                            <div class="tm">{{ String(s.start).padStart(2, '0') }}:00 – {{ String(s.end).padStart(2, '0') }}:00・{{ ((Number(s.end) - Number(s.start) + 24) % 24) || 24 }} 小時</div>
+                                            <div class="bar"><span :style="{ left: (Number(s.start) / 24 * 100) + '%', width: ((((Number(s.end) - Number(s.start) + 24) % 24) || 24) / 24 * 100) + '%' }"></span></div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <p v-else class="text-[13px] font-bold text-slate-400">{{ isPastDate(schedSelDay.fullDate) ? '這天已過，沒有排班紀錄' : '這天還沒有人登記' }}</p>
                                 <button v-if="!isPastDate(schedSelDay.fullDate) && !isMyShift(schedSelDay.fullDate)" class="ui-btn" @click="openShiftModal(schedSelDay)">登記這天的排班</button>
                                 <button v-if="isMyShift(schedSelDay.fullDate)" class="ui-btn ghost" @click="openDeleteShiftModal(schedSelDay)">取消我這天的排班</button>
