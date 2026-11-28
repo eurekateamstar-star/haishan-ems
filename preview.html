@@ -483,6 +483,62 @@
         .me-pop .sw i{position:absolute;left:2px;top:2px;width:18px;height:18px;border-radius:9px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s}
         .me-pop .sw.on{background:#1d4ed8}.me-pop .sw.on i{left:18px}
         .me-pop .me-row select{margin-left:auto;font-size:13px;font-weight:800;color:#1d4ed8;background:#eef3ff;border:0;border-radius:9px;padding:5px 8px;outline:none}
+        /* ===== 隊員個人編輯（左側目錄） ===== */
+        .mem-page{flex:1;min-height:0;display:flex;flex-direction:column;padding:4px 14px calc(100px + var(--safe-bottom))}
+        .mem-hd{display:flex;align-items:center;gap:12px;margin:4px 2px 10px}
+        .mem-hd .ph{position:relative;width:48px;height:48px;border-radius:24px;background:linear-gradient(135deg,#94a3b8,#cbd5e1);color:#fff;font-weight:900;font-size:19px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .mem-hd .ph img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+        .mem-hd .ln{position:absolute;right:-3px;bottom:-3px;width:18px;height:18px;border-radius:9px;background:#06C755;color:#fff;font-size:9px;font-style:normal;font-weight:900;border:2px solid #fff;display:flex;align-items:center;justify-content:center}
+        .mem-hd b{display:block;font-size:19px;font-weight:900;color:#0f172a}.mem-hd small{font-size:12px;font-weight:800;color:#1d4ed8}
+        .mem-body{flex:1;min-height:0;display:flex;gap:10px}
+        .mem-rail{width:60px;flex-shrink:0;align-self:flex-start;background:#e9edf3;border-radius:17px;padding:4px;display:flex;flex-direction:column;gap:3px}
+        .mem-rail button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0;border-radius:13px;font-size:10px;font-weight:900;color:#94a3b8}
+        .mem-rail button i{font-size:16px}
+        .mem-rail button.on{background:#fff;color:#1d4ed8;box-shadow:0 2px 6px rgba(15,23,42,.08)}
+        .mem-rail button.on.danger{color:#e11d48}
+        .mem-main{flex:1;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding-bottom:10px}
+        .mem-main::-webkit-scrollbar{display:none}
+        .mem-main h5{font-size:16px;font-weight:900;color:#0f172a;display:flex;align-items:baseline;gap:8px}.mem-main h5 small{margin-left:auto;font-size:12px;font-weight:800;color:#64748b}
+        .mem-2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+        .mf{display:flex;flex-direction:column;gap:4px}
+        .mf>span{font-size:11px;font-weight:800;color:#64748b;display:flex;align-items:center}
+        .mf>span em{margin-left:auto;font-style:normal;font-size:10px;font-weight:900;padding:2px 7px;border-radius:7px}
+        .mf>span em.bad{color:#e11d48;background:#fff1f2}.mf>span em.ok{color:#059669;background:#ecfdf5}.mf>span em.mid{color:#b45309;background:#fef3c7}
+        .mf input,.mf select{width:100%;box-sizing:border-box;height:42px;border-radius:12px;border:1.5px solid #e7eaf0;background:#fff;padding:0 11px;font-size:14px;font-weight:800;color:#0f172a;outline:none}
+        .mf.row{flex-direction:row;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid #e7eaf0;border-radius:12px;padding:6px 10px}
+        .mf .stp{display:flex;align-items:center;gap:10px}.mf .stp button{all:unset;cursor:pointer;width:30px;height:30px;border-radius:9px;background:#f1f5f9;text-align:center;line-height:30px;font-weight:900;color:#1d4ed8}.mf .stp b{font-family:Inter,sans-serif;font-size:16px;min-width:22px;text-align:center}
+        .mem-months{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+        .mem-months button,.mem-seg button{all:unset;cursor:pointer;text-align:center;padding:8px 0;border-radius:10px;font-size:12px;font-weight:900;color:#475569;background:#fff;border:1px solid #e2e8f0}
+        .mem-months button.on,.mem-seg button.on{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+        .mem-seg{display:flex;gap:5px}.mem-seg button{flex:1}
+        .mem-sec{font-size:11px;font-weight:900;color:#64748b;margin-top:4px}.mem-sec em{font-style:normal;font-weight:700;color:#94a3b8;margin-left:6px}
+        .mem-note{font-size:11px;font-weight:700;color:#94a3b8;line-height:1.5}.mem-note.warn{color:#b45309}
+        .mem-list{background:#fff;border:1.5px solid #e7eaf0;border-radius:13px;padding:2px 10px}
+        .mem-med{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f1f3f6}.mem-med:last-child{border-bottom:0}
+        .mem-med>i{width:24px;height:24px;border-radius:12px;background:#f1f5f9;color:#cbd5e1;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .mem-med.got>i{background:#fef3c7;color:#d97706}
+        .mem-med span{flex:1;font-size:12px;font-weight:800;color:#64748b}.mem-med.got span{color:#0f172a}
+        .mem-med input{width:74px;height:30px;border-radius:9px;border:1px dashed #cbd5e1;text-align:center;font-size:12px;font-weight:900;color:#c2410c;outline:none;background:#fff}
+        .mem-med.got input{border:0;background:#fff7ed}
+        .mem-hr{display:flex;align-items:center;gap:6px;padding:4px 0}
+        .mem-hr span{width:28px;font-family:Inter,sans-serif;font-size:11px;font-weight:700;color:#64748b}
+        .mem-hr i{flex:1;height:14px;border-radius:5px;background:#f1f5f9;position:relative;overflow:hidden}.mem-hr i b{position:absolute;left:0;top:0;bottom:0;background:#c7d2fe;border-radius:5px}
+        .mem-hr input{width:52px;height:28px;border-radius:8px;border:1px solid #e2e8f0;text-align:right;padding:0 6px;font-family:Inter,sans-serif;font-size:13px;font-weight:800;outline:none}
+        .mem-card{background:#fff;border:1.5px solid #e7eaf0;border-radius:13px;padding:11px 12px;display:flex;flex-direction:column;gap:3px}
+        .mem-card.row{flex-direction:row;align-items:center;gap:10px}.mem-card.row>div{flex:1;min-width:0}
+        .mem-card b{font-size:14px;font-weight:900;color:#0f172a}.mem-card small{display:block;font-size:11px;font-weight:700;color:#64748b;line-height:1.45}
+        .mem-card.danger{border-color:#fecdd3;background:#fff8f8}.mem-card.danger b{color:#e11d48}
+        .mem-card .sw{all:unset;cursor:pointer;width:44px;height:26px;border-radius:13px;background:#e2e8f0;position:relative;flex-shrink:0;transition:background .2s}
+        .mem-card .sw i{position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s}
+        .mem-card .sw.on{background:#1d4ed8}.mem-card .sw.on i{left:21px}.mem-card .sw:disabled{opacity:.5}
+        .mem-card .lk{all:unset;cursor:pointer;font-size:12px;font-weight:900;color:#e11d48}
+        .mem-big{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e7eaf0;border-radius:14px;padding:12px}
+        .mem-big>i{width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--c) 10%,#fff);color:var(--c);display:flex;align-items:center;justify-content:center;font-size:17px}
+        .mem-big b{display:block;font-size:15px;font-weight:900;color:#0f172a}.mem-big small{font-size:11px;font-weight:700;color:#64748b}
+        .mem-del{all:unset;box-sizing:border-box;cursor:pointer;margin-top:8px;height:40px;border-radius:11px;background:#e11d48;color:#fff;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center}
+        .mem-del.soft{background:#fff1f2;color:#e11d48}
+        .mem-save{all:unset;box-sizing:border-box;cursor:pointer;flex-shrink:0;margin-top:6px;height:46px;border-radius:13px;background:#1d4ed8;color:#fff;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center}
+        .mem-save:disabled{opacity:.6}
         /* ===== 新版（質感版） ===== */
         html, body, #app, header.bg-\[\#f1f5f9\], .tabs-section{background-color:#f3f5f9!important}
         .pg-blue-off{background:radial-gradient(130% 32% at 50% 0%,rgba(29,78,216,.08),rgba(255,255,255,0))}
@@ -679,6 +735,10 @@
                     <div>
                         <label class="text-[11px] font-black text-slate-400 ml-1">生日（驗證身分用）</label>
                         <input v-model="bindForm.birthday" type="date" class="med-input w-full p-4 font-bold bg-white mt-1">
+                    </div>
+                    <div v-if="bindNeedId">
+                        <label class="text-[11px] font-black text-slate-400 ml-1">身分證字號（驗證身分用）</label>
+                        <input v-model="bindForm.idNumber" @input="bindForm.idNumber = (bindForm.idNumber || '').toUpperCase()" maxlength="10" autocapitalize="characters" placeholder="例如 A123456789" class="med-input w-full p-4 font-bold bg-white mt-1">
                     </div>
 
                     <button @click="bindAndLogin" :disabled="bindLoading" class="med-btn w-full py-4 mt-2 transition-all tracking-widest text-[15px] font-black shadow-lg shadow-blue-200 disabled:opacity-60">
@@ -1207,7 +1267,7 @@
     </div>
     <div class="grid grid-cols-3 gap-3">
         <div v-for="m in filteredAdminMembers" :key="m.姓名" 
-             @click="openAdminMemberMenu(m)"
+             @click="memOpen(m)"
              class="relative bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center cursor-pointer active:scale-95 hover:border-blue-200 transition-all"
              :class="{'opacity-60 grayscale': m.is_suspended}">
             
@@ -1252,6 +1312,83 @@
                             <i class="fa-solid fa-lock text-4xl mb-4"></i>
                             <p class="font-black text-sm">僅限管理員使用</p>
                         </div>
+            </div>
+        </div>
+
+        <!-- 隊員個人編輯（獨立頁、左側目錄） -->
+        <div v-else-if="currPage === 'member'" class="dashboard-wrapper fade-in">
+            <div class="mem-page" v-if="adminSelectedMember">
+                <button class="con-back" @click="currPage = 'console'"><i class="fa-solid fa-arrow-left"></i>主控台</button>
+                <div class="mem-hd">
+                    <span class="ph"><img v-if="adminSelectedMember.line_picture_url" :src="adminSelectedMember.line_picture_url" referrerpolicy="no-referrer" alt=""><template v-else>{{ adminSelectedMember.姓名.charAt(0) }}</template><i v-if="adminSelectedMember.hasBind" class="ln">L</i></span>
+                    <div class="min-w-0"><b>{{ adminSelectedMember.姓名 }}</b><small>{{ adminSelectedMember.duty_group || '' }}・{{ adminSelectedMember.duty_title || '隊員' }}<template v-if="adminSelectedMember.is_suspended">・已暫停</template></small></div>
+                </div>
+                <div class="mem-body">
+                    <nav class="mem-rail">
+                        <button v-for="t in MEM_TABS" :key="t.k" :class="{ on: memTab === t.k, danger: t.k === '刪除' }" @click="memTab = t.k"><i :class="'fa-solid ' + t.i"></i>{{ t.k }}</button>
+                    </nav>
+                    <div class="mem-main">
+                        <!-- 資料 -->
+                        <template v-if="memTab === '資料'">
+                            <h5>基本資料</h5>
+                            <div class="mem-2"><label class="mf"><span>所屬小隊</span><select v-model="adminEditForm.duty_group"><option v-for="o in ['幹部','第一小隊','第二小隊','第三小隊','第四小隊','第五小隊']" :key="o">{{ o }}</option></select></label>
+                                <label class="mf"><span>職稱</span><select v-model="adminEditForm.duty_title"><option v-for="o in ['分隊長','副分隊長','幹事','助理幹事','小隊長','副小隊長','隊員']" :key="o">{{ o }}</option></select></label></div>
+                            <label class="mf"><span>加入日期</span><input type="date" v-model="adminEditForm.join_date"></label>
+                            <div class="mem-sec">綁定 LINE 時核對本人用<em>只有幹部看得到</em></div>
+                            <label class="mf"><span>生日</span><input type="date" v-model="memSecret.birthday"></label>
+                            <label class="mf"><span>身分證字號</span><input type="text" v-model="memSecret.id_number" maxlength="10" autocapitalize="characters" placeholder="例如 A123456789" @input="memSecret.id_number = memSecret.id_number.toUpperCase()"></label>
+                            <div v-if="memSecretErr" class="mem-note warn">{{ memSecretErr }}</div>
+                            <div class="mem-sec">勤務</div>
+                            <div class="mf row"><span>公差次數</span><span class="stp"><button @click="adminEditForm.duty_count = Math.max(0, (adminEditForm.duty_count || 0) - 1)">−</button><b>{{ adminEditForm.duty_count || 0 }}</b><button @click="adminEditForm.duty_count = (adminEditForm.duty_count || 0) + 1">＋</button></span></div>
+                            <div class="mf"><span>請假月份（可複選）</span><div class="mem-months"><button v-for="mm in 12" :key="mm" :class="{ on: (adminEditForm.leave_month || []).includes(mm + '月') }" @click="toggleLeaveMonth(mm + '月')">{{ mm }}月</button></div></div>
+                        </template>
+                        <!-- 證照 -->
+                        <template v-if="memTab === '證照'">
+                            <h5>證照與榮譽卡</h5>
+                            <div class="mf"><span>EMT 等級</span><div class="mem-seg"><button v-for="o in ['初級技術員','中級技術員','高級技術員']" :key="o" :class="{ on: adminEditForm.emt_level === o }" @click="adminEditForm.emt_level = o">{{ o.replace('技術員', '') }}</button></div></div>
+                            <label class="mf"><span>EMT 到期日<em :class="memLeft(adminEditForm.emt_expiry).c">{{ memLeft(adminEditForm.emt_expiry).t }}</em></span><input type="date" v-model="adminEditForm.emt_expiry"></label>
+                            <label class="mf"><span>志工榮譽卡到期日<em :class="memLeft(adminEditForm.honor_expiry).c">{{ memLeft(adminEditForm.honor_expiry).t }}</em></span><input type="date" v-model="adminEditForm.honor_expiry"></label>
+                        </template>
+                        <!-- 獎章 -->
+                        <template v-if="memTab === '獎章'">
+                            <h5>榮譽獎章<small>已得 {{ medalList.filter((x) => adminEditForm.medals && adminEditForm.medals[x.id]).length }} 面</small></h5>
+                            <div class="mem-list">
+                                <label v-for="md in medalList" :key="md.id" class="mem-med" :class="{ got: adminEditForm.medals[md.id] }"><i class="fa-solid fa-medal"></i><span>{{ md.name.replace('\n', ' ') }}</span><input type="text" v-model="adminEditForm.medals[md.id]" placeholder="＋ 年度"></label>
+                            </div>
+                        </template>
+                        <!-- 時數 -->
+                        <template v-if="memTab === '時數'">
+                            <h5>歷年時數<small>合計 {{ memHistTotal }}</small></h5>
+                            <div class="mem-list">
+                                <div v-for="k in memHistKeys" :key="k" class="mem-hr"><span>{{ k.slice(5) }}</span><i><b :style="{ width: memHistPct(k) + '%' }"></b></i><input type="number" inputmode="numeric" v-model="adminEditForm.history[k]" placeholder="—"></div>
+                            </div>
+                            <div class="mem-note">今年由系統自動計算；這裡只改去年以前的歷史時數。</div>
+                        </template>
+                        <!-- 帳號 -->
+                        <template v-if="memTab === '帳號'">
+                            <h5>帳號與權限</h5>
+                            <div class="mem-card row"><div><b>系統管理員</b><small>可進主控台、改所有人資料</small></div><button class="sw" :class="{ on: adminSelectedMember.is_admin || adminSelectedMember.is_super_admin }" :disabled="adminActionLoading === 'admin_toggle' || adminSelectedMember.is_super_admin" @click="toggleAdminStatus(adminSelectedMember)"><i></i></button></div>
+                            <div class="mem-card row"><div><b>暫停權限</b><small>暫停後不能登入、不能登記</small></div><button class="sw" :class="{ on: adminSelectedMember.is_suspended }" :disabled="adminActionLoading === 'suspend'" @click="toggleSuspendMember(adminSelectedMember)"><i></i></button></div>
+                            <div class="mem-card row"><div><b>{{ adminEditForm.uid ? 'LINE 已綁定' : 'LINE 尚未綁定' }}</b><small v-if="adminEditForm.uid">{{ adminEditForm.line_display_name || '' }}{{ adminSelectedMember.bound_at ? '・' + String(adminSelectedMember.bound_at).slice(0, 10) : '' }}</small><small v-else>隊員第一次用 LINE 登入時，用生日{{ memSecret.id_number ? '＋身分證字號' : '' }}綁定</small></div><button v-if="adminEditForm.uid" class="lk" @click="unbindGoogleAccount">解除綁定</button></div>
+                        </template>
+                        <!-- 代登記 -->
+                        <template v-if="memTab === '代登記'">
+                            <h5>代為登記<small>用 {{ adminSelectedMember.姓名 }} 的名字</small></h5>
+                            <button class="mem-big" @click="openAdminAddShift(adminSelectedMember)"><i class="fa-solid fa-calendar-plus" style="--c:#2563eb"></i><div><b>代為排班</b><small>選日期和時段</small></div></button>
+                            <button class="mem-big" @click="openAdminAddReg(adminSelectedMember, 'duty')"><i class="fa-solid fa-clipboard-check" style="--c:#e11d48"></i><div><b>代為公差</b><small>選要報名的公差</small></div></button>
+                            <button class="mem-big" @click="openAdminAddReg(adminSelectedMember, 'meeting')"><i class="fa-solid fa-users" style="--c:#7c3aed"></i><div><b>代為會議</b><small>填出席、葷素</small></div></button>
+                            <div class="mem-sec">本週已登記</div>
+                            <div class="mem-card"><div v-if="adminSelectedMember.weekActivities && adminSelectedMember.weekActivities.length" class="flex flex-wrap gap-1.5"><span v-for="act in adminSelectedMember.weekActivities" :key="act.key" class="text-[11px] font-bold px-2 py-1 rounded-lg bg-slate-50 border border-slate-100">{{ act.label || act.text || act.key }}</span></div><small v-else>本週沒有登記任何活動</small></div>
+                        </template>
+                        <!-- 刪除 -->
+                        <template v-if="memTab === '刪除'">
+                            <h5>刪除</h5>
+                            <div class="mem-card"><b>刪除活動紀錄</b><small>刪掉他已經登記的排班、公差或會議</small><button class="mem-del soft" @click="openAdminDeleteActivity(adminSelectedMember)">選擇要刪除的紀錄</button></div>
+                            <div class="mem-card danger"><b>刪除人員</b><small>{{ adminSelectedMember.姓名 }} 的資料和所有紀錄都會一起刪掉，無法復原。</small><button class="mem-del" @click="confirmDeleteMember(adminSelectedMember)">刪除這位隊員</button></div>
+                        </template>
+                        <button v-if="['資料','證照','獎章','時數'].includes(memTab)" class="mem-save" :disabled="adminActionLoading === 'edit'" @click="memSave">{{ adminActionLoading === 'edit' ? '儲存中…' : '儲存' }}</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -3433,7 +3570,8 @@ window.__openBook = function (a, e) {
             const lineProfileRef = ref(null);
             const squads = ref([]);
             const bindableMembers = ref([]);
-            const bindForm = ref({ squadId: '', memberId: '', birthday: '' });
+            const bindForm = ref({ squadId: '', memberId: '', birthday: '', idNumber: '' });
+            const bindNeedId = ref(false);
             const bindLoading = ref(false);
             const currentSquadIdRef = ref(null);
             const myRole = ref('member');
@@ -4183,7 +4321,7 @@ const submitAddMember = async () => {
             join_date: getTodayStr()
         });
         isAddMemberModalOpen.value = false;
-        showAppAlert('success', '新增成功', `已成功加入 ${f.name}。\n預設登入密碼為：${uppercaseIdNo}`);
+        showAppAlert('success', '新增成功', `已成功加入 ${f.name}。\n第一次用 LINE 登入時，用生日和身分證字號綁定。`);
     } catch(e) {
         showAppAlert('error', '新增失敗', e.message);
     } finally {
@@ -5443,10 +5581,11 @@ onSnapshot(doc(db, "finance", "squad_fund"), (docSnap) => {
                 try {
                     const { data, error } = await sbClient.rpc('bind_member', {
                         p_member_id: f.memberId, p_birthday: f.birthday,
-                        p_display_name: lineProfileRef.value?.name || null, p_picture_url: lineProfileRef.value?.picture || null
+                        p_display_name: lineProfileRef.value?.name || null, p_picture_url: lineProfileRef.value?.picture || null,
+                        ...(f.idNumber ? { p_id_number: f.idNumber.trim().toUpperCase() } : {})
                     });
                     if (error) throw new Error(error.message);
-                    if (!data.ok) { bindLoading.value = false; return showAppAlert('error', '綁定失敗', data.message); }
+                    if (!data.ok) { bindLoading.value = false; if (data.need_id) bindNeedId.value = true; return showAppAlert('error', '綁定失敗', data.message); }
                     const { data: b } = await sbClient.rpc('my_binding');
                     binding.value = b;
                     authLoading.value = true;
@@ -7147,6 +7286,44 @@ const handleTimeInput = (item, field, formType) => {
 
             const afTried = ref(false), afConfirm = ref(false);
             const meMenu = ref(false);
+            const MEM_TABS = [{ k: '資料', i: 'fa-id-card' }, { k: '證照', i: 'fa-kit-medical' }, { k: '獎章', i: 'fa-medal' }, { k: '時數', i: 'fa-clock-rotate-left' }, { k: '帳號', i: 'fa-shield-halved' }, { k: '代登記', i: 'fa-calendar-plus' }, { k: '刪除', i: 'fa-trash-can' }];
+            const memTab = ref('資料');
+            const memSecret = ref({ birthday: '', id_number: '' }); let memSecretOrig = { birthday: '', id_number: '' };
+            const memSecretErr = ref('');
+            const memOpen = async (m) => {
+                openAdminMemberMenu(m); isAdminMemberMenuOpen.value = false;
+                memTab.value = '資料'; memSecret.value = { birthday: '', id_number: '' }; memSecretOrig = { birthday: '', id_number: '' }; memSecretErr.value = '';
+                currPage.value = 'member';
+                await openAdminEditMember(m); isAdminEditMemberOpen.value = false;
+                try {
+                    const { data, error } = await sbClient.rpc('member_secret', { p_member_id: m.id });
+                    if (error) throw error;
+                    if (data && data.ok) { memSecret.value = { birthday: data.birthday || '', id_number: data.id_number || '' }; memSecretOrig = { ...memSecret.value }; }
+                } catch (e) { memSecretErr.value = '資料庫還沒更新（migration_003），目前看不到已登錄的生日和身分證；這裡填了一樣可以存。'; }
+            };
+            const memLeft = (d) => {
+                if (!d) return { t: '', c: '' };
+                const days = Math.ceil((new Date(d + 'T23:59:59') - new Date()) / 86400000);
+                return days < 0 ? { t: '已到期', c: 'bad' } : { t: '剩 ' + days + ' 天', c: days <= 90 ? 'mid' : 'ok' };
+            };
+            const memHistKeys = computed(() => Object.keys((adminEditForm.value && adminEditForm.value.history) || {}).sort((a, b) => parseInt(b.slice(5)) - parseInt(a.slice(5))));
+            const memHistTotal = computed(() => memHistKeys.value.reduce((n, k) => n + (Number(adminEditForm.value.history[k]) || 0), 0));
+            const memHistPct = (k) => { const mx = Math.max(1, ...memHistKeys.value.map((x) => Number(adminEditForm.value.history[x]) || 0)); return (Number(adminEditForm.value.history[k]) || 0) / mx * 100; };
+            const memSave = async () => {
+                const m = adminEditTarget.value; if (!m) return;
+                const sec = memSecret.value;
+                if (sec.id_number && !/^[A-Z][0-9]{9}$/.test(sec.id_number)) return showAppAlert('error', '身分證字號格式不對', '請輸入 1 個英文字母加 9 個數字，例如 A123456789。');
+                await submitAdminEditMember();
+                if (sec.birthday !== memSecretOrig.birthday || sec.id_number !== memSecretOrig.id_number) {
+                    try {
+                        const patch = {};
+                        if (sec.birthday !== memSecretOrig.birthday) patch.birthday = sec.birthday || null;
+                        if (sec.id_number !== memSecretOrig.id_number) patch.id_no = sec.id_number || '';
+                        await updateDoc(doc(db, 'members', m.id), patch);
+                        memSecretOrig = { ...sec };
+                    } catch (e) { showAppAlert('error', '提示', '生日或身分證儲存失敗：' + e.message); }
+                }
+            };
             const meAvatarBad = ref(false);
             const meAvatar = computed(() => meAvatarBad.value ? '' : ((lineProfileRef.value && lineProfileRef.value.picture) || userData.value.line_picture_url || ''));
             const mePrevPage = ref('dashboard');
@@ -7845,7 +8022,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 openAdminDeleteActivity, adminDeleteableActivities, confirmAdminDeleteAct, executeAdminDeleteAct,isMemberHistoryModalOpen, selectedDutyMember, openMemberDutyHistory, selectedMemberDutyHistory,
                 
                 // 協勤專屬
-                assistanceStep, assistanceForm, afTried, afConfirm, afHours, meMenu, meAvatar, meAvatarBad, meOpenConsole, mePrevPage, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
+                assistanceStep, assistanceForm, afTried, afConfirm, afHours, meMenu, bindNeedId, meAvatar, meAvatarBad, meOpenConsole, mePrevPage, MEM_TABS, memTab, memSecret, memSecretErr, memOpen, memLeft, memHistKeys, memHistTotal, memHistPct, memSave, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
                 isAssistTimeModalOpen, assistTempStart, assistTempEnd, openAssistTimeModal, selectAssistHour, resetAssistTimeSelection, confirmAssistTime, isAssistHourDisabled,
                 activeAssistTab, visibleAssistTabs, assistSlider, assistTabsScrollRef, scrollToAssistTab, onAssistSliderScroll, dynamicMemberHours,displayEmtExpiry,exportPaymentRequestToExcel,
                 myAssistanceRecords, allAssistanceRecords, isAssistEditModalOpen, editingAssistRecord, openAssistEditModal, submitAssistEdit, deleteAssistRecord, handleTimeInput,

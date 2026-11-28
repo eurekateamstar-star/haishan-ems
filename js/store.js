@@ -237,9 +237,19 @@ export async function refreshAll(opts = {}) {
 // ---------------------------------------------------------------------
 const MEMBER_COLS = ['squad_id', 'birthday', 'duty_group', 'duty_title', 'is_suspended', 'join_date', 'emt_level',
   'emt_expiry', 'honor_expiry', 'duty_count', 'sort_order'];
-const IGNORED_MEMBER_FIELDS = new Set(['password', 'id_no', 'email', 'uid', 'pushSubscription', 'id', 'is_super_admin',
+const IGNORED_MEMBER_FIELDS = new Set(['password', 'email', 'uid', 'pushSubscription', 'id', 'is_super_admin',
   'line_display_name', 'line_picture_url', 'bound_at', 'timestamp']);
 const dateOrNull = (v) => (v ? String(v).slice(0, 10) : null);
+
+// 資料庫還沒執行 migration_003（沒有 id_number 欄位）時，先不寫身分證，其他資料照存
+async function withoutMissingId(row, run) {
+  const res = await run(row);
+  if (res.error && 'id_number' in row && /id_number/.test(res.error.message || '')) {
+    const { id_number, ...rest } = row;
+    return Object.keys(rest).length ? run(rest) : { data: null, error: null };
+  }
+  return res;
+}
 
 async function memberPatch(data, current) {
   const row = {}; const extra = { ...(current?.extra || {}) };
@@ -251,6 +261,7 @@ async function memberPatch(data, current) {
     else if (k === 'role') row.role = v;
     else if (k.startsWith('medal_')) { medalsTouched = true; const key = k.slice(6); if (v) medals[key] = String(v); else delete medals[key]; }
     else if (k.startsWith('hist_')) { histTouched = true; const key = k.slice(5); if (v === '' || v == null) delete hist[key]; else hist[key] = Number(v); }
+    else if (k === 'id_no' || k === 'id_number') row.id_number = v ? String(v).trim().toUpperCase() : null;
     else if (MEMBER_COLS.includes(k)) row[k] = ['join_date', 'emt_expiry', 'honor_expiry', 'birthday'].includes(k) ? dateOrNull(v) : v;
     else if (!IGNORED_MEMBER_FIELDS.has(k)) { extraTouched = true; extra[k] = v; }
   }
@@ -334,7 +345,7 @@ export async function addDoc(ref, data) {
     case 'assistance_records': id = await writeAssistance(null, data); break;
     case 'members': {
       const row = await memberPatch(data, null);
-      id = check(await sb.from('members').insert({ squad_id: squadId, ...row }).select('id').single()).id;
+      id = check(await withoutMissingId(row, (r) => sb.from('members').insert({ squad_id: squadId, ...r }).select('id').single())).id;
       break;
     }
     default: throw new Error('新系統不支援寫入：' + ref.name);
@@ -347,7 +358,7 @@ export async function addDoc(ref, data) {
 export async function setDoc(ref, data) {
   if (ref.name !== 'members') throw new Error('新系統不支援 setDoc：' + ref.name);
   const row = await memberPatch({ 姓名: ref.id, ...data }, null);
-  check(await sb.from('members').insert({ squad_id: squadId, ...row }));
+  check(await withoutMissingId(row, (r) => sb.from('members').insert({ squad_id: squadId, ...r })));
   await refresh('members');
 }
 
@@ -356,7 +367,7 @@ export async function updateDoc(ref, data) {
     case 'members': {
       const current = membersRows.find((m) => m.id === ref.id);
       const row = await memberPatch(data, current);
-      if (Object.keys(row).length) check(await sb.from('members').update(row).eq('id', ref.id));
+      if (Object.keys(row).length) check(await withoutMissingId(row, (r) => sb.from('members').update(r).eq('id', ref.id)));
       break;
     }
     case 'shifts': await updateWithExtra('shifts', ref.id, data, SHIFT_COLS); break;
