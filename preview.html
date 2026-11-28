@@ -268,6 +268,45 @@
         .seg button.on{background:#fff;color:#111827;box-shadow:0 1px 3px rgba(15,23,42,.12)}
         .grp-head{background:#fff!important;border-bottom:1px solid #f1f5f9!important}
 
+        /* ===== 公差・會議：票券＋狀態分組 ===== */
+        .tlane{background:#fbfcfd;border-radius:22px;padding:12px 10px 10px;box-shadow:inset 0 0 0 1px #e9edf3;display:flex;flex-direction:column;gap:10px}
+        .tlane+.tlane{margin-top:14px}
+        .tlane .lh{display:flex;align-items:center;gap:8px;padding:0 4px}
+        .tlane .lh .dot{width:8px;height:8px;border-radius:4px;background:var(--lc)}
+        .tlane .lh .t{font-size:14px;font-weight:900;color:#0f172a}
+        .tlane .lh .n{font-family:Inter,sans-serif;font-size:12px;font-weight:800;color:#8a94a6}
+        .tlane .lh .h{margin-left:auto;font-size:11px;font-weight:700;color:#8a94a6}
+        .tk{position:relative;display:flex;background:#fff;border-radius:18px;border:1px solid #e7eaf0;box-shadow:0 1px 2px rgba(15,23,42,.04),0 10px 22px -18px rgba(15,23,42,.35)}
+        .tk .stub{width:74px;flex-shrink:0;border-radius:17px 0 0 17px;background:var(--c);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 0;background-image:linear-gradient(160deg,rgba(255,255,255,.18),rgba(255,255,255,0))}
+        .tk .stub .k{font-size:10px;font-weight:800;opacity:.85;letter-spacing:.12em}
+        .tk .stub .d{font-family:Inter,sans-serif;font-weight:800;font-size:21px;line-height:1.25}
+        .tk .stub .w{font-size:11px;font-weight:700;opacity:.9}
+        .tk .perf{border-left:2px dashed #e7eaf0;margin:12px 0}
+        .tk .notch{position:absolute;left:65px;width:18px;height:18px;border-radius:9px;background:#fbfcfd;border:1px solid #e7eaf0}
+        .tk .notch.t{top:-9px;clip-path:inset(50% 0 0 0)}.tk .notch.b{bottom:-9px;clip-path:inset(0 0 50% 0)}
+        .tk .bd{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+        .tk .ttl{font-size:16px;font-weight:900;color:#0f172a;line-height:1.3;padding-right:56px}
+        .tk .mt{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#475569;font-weight:600}
+        .tk .mt span{display:flex;gap:7px;align-items:flex-start}.tk .mt i{color:var(--c);width:13px;text-align:center;margin-top:2px;font-size:11px}
+        .tk .note{font-size:11px;font-weight:700;color:#64748b;background:#f8fafc;border-radius:10px;padding:7px 9px}
+        .tk .chips{display:flex;gap:5px;flex-wrap:wrap}
+        .tk .chips span{font-size:12px;font-weight:800;padding:3px 8px;border-radius:8px;border:1px solid #e7eaf0;color:#334155}
+        .tk .cap .r{display:flex;justify-content:space-between;font-size:11px;font-weight:800;color:#8a94a6}
+        .tk .cap .r b{font-family:Inter,sans-serif;color:#0f172a}
+        .tk .cap .bar{height:5px;border-radius:3px;background:#eef0f3;margin-top:4px;overflow:hidden}.tk .cap .bar i{display:block;height:5px;border-radius:3px;background:var(--c)}
+        .tk .btn{all:unset;box-sizing:border-box;width:100%;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:900;cursor:pointer}
+        .tk .btn.pri{background:var(--c);color:#fff}.tk .btn.mute{background:#f1f3f6;color:#64748b}
+        .tk .btn.out{height:34px;font-size:12px;color:var(--c);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 30%,transparent)}
+        .tk .btn:disabled{opacity:.6;cursor:default}
+        .tk .adm{position:absolute;top:8px;right:8px;display:flex;gap:2px}
+        .tk .adm button{all:unset;cursor:pointer;width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:12px}
+        .tk .badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:900;padding:2px 7px;border-radius:7px;color:var(--c);background:color-mix(in srgb,var(--c) 10%,#fff);width:fit-content}
+        .tk .rs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;cursor:pointer}
+        .tk .rs>div{border:1px solid #e7eaf0;border-radius:10px;padding:5px 0;text-align:center}
+        .tk .rs .a{font-size:10px;font-weight:800}.tk .rs .v{font-family:Inter,sans-serif;font-weight:800;font-size:16px;color:#0f172a}
+        .tk .fill{display:flex;justify-content:space-between;font-size:11px;font-weight:800;color:#8a94a6}.tk .fill b{font-family:Inter,sans-serif;color:#0f172a}
+        .tk.ended .stub{background:#94a3b8}.tk.ended{opacity:.72}
+        .tlempty{background:#fff;border-radius:18px;border:1px dashed #e2e8f0;padding:22px;text-align:center;font-size:13px;font-weight:800;color:#94a3b8}
         /* ===== 新版（質感版） ===== */
         html, body, #app, header.bg-\[\#f1f5f9\], .tabs-section{background-color:#f3f5f9!important}
         .pg-blue-off{background:radial-gradient(130% 32% at 50% 0%,rgba(29,78,216,.08),rgba(255,255,255,0))}
@@ -862,46 +901,28 @@
                                 <div><h3 class="text-xl font-black text-slate-800">公差任務登記</h3></div>
                                 <button v-if="isAdmin" @click="openPostTaskModal('duty')" class="h-10 px-4 rounded-xl bg-rose-500 text-white font-black text-xs shadow-sm"><i class="fa-solid fa-plus mr-1"></i> 發佈任務</button>
                             </div>
-                            <div class="space-y-5">
-                                <div v-for="t in filteredOfficialTasks" :key="t.id" class="list-card shadow-sm border-0 relative" :class="{ 'expired-task': isExpired(t.date) }">
-    <!-- 管理員操作按鈕區：編輯 與 刪除 -->
-    <div v-if="isAdmin" class="absolute top-3 right-3 flex items-center gap-1 z-10">
-        <button @click.stop="openEditTaskModal(t, 'duty')" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-blue-500 hover:bg-blue-50 active:scale-95 transition-all">
-            <i class="fa-solid fa-pen-to-square text-xs"></i>
-        </button>
-        <button @click.stop="confirmDeleteTask(t, 'duty')" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 active:scale-95 transition-all">
-            <i class="fa-solid fa-trash-can text-xs"></i>
-        </button>
-    </div>
-                                    <div class="p-5 task-card-header bg-slate-50/50 flex gap-4 items-stretch">
-                                        <div class="task-card-date-box border border-rose-100 flex flex-col justify-center"><p class="text-lg font-num text-slate-800 leading-none">{{ t.date.split('-')[1] }}/{{ t.date.split('-')[2] }}</p><p class="text-[10px] font-black text-rose-500 uppercase tracking-tighter mt-1">{{ getWeekday(t.date) }}</p></div>
-                                        <div class="flex-1 flex flex-col justify-center"><span class="type-tag tag-official inline-block mb-1.5 w-fit">公差任務</span><h4 class="text-lg font-black text-slate-800 leading-tight">{{ t.title }}</h4></div>
-                                    </div>
-                                    <div class="p-5 space-y-4">
-                                        <div class="grid grid-cols-2 gap-4"><div class="flex items-center gap-3 text-xs font-bold text-slate-500"><i class="fa-solid fa-clock text-rose-400 w-4 text-center"></i> {{ t.startTime }} - {{ t.endTime }}</div><div class="flex items-center gap-3 text-xs font-bold text-slate-500"><i class="fa-solid fa-location-dot text-rose-400 w-4 text-center"></i> {{ t.location }}</div></div>
-                                        <div v-if="t.note" class="bg-rose-50/50 text-rose-700/80 p-3 rounded-xl text-[11px] font-bold border border-rose-100/50"><i class="fa-solid fa-info-circle mr-1"></i> {{ t.note }}</div>
-                                        <div class="flex items-center justify-between border-t border-slate-100 pt-4">
-                                            <div class="flex flex-wrap gap-1.5 flex-1 mr-4"><span v-for="name in getTaskParticipants(t.id)" :key="name" class="text-[10px] font-black px-2.5 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-lg shadow-sm">{{ name }}</span><span v-if="getTaskRegCount(t.id) === 0" class="text-[10px] font-bold text-slate-300 italic">尚未有人登記</span></div>
-                                            <div class="text-right shrink-0"><p class="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">已報名/名額</p><p class="text-xl font-num text-slate-800">{{ getTaskRegCount(t.id) }} <span class="text-xs text-slate-300">/ {{ t.quota }}</span></p></div>
+                            <div>
+                                <div v-if="!dutyLanes.length" class="tlempty">目前沒有公差任務</div>
+                                <section v-for="L in dutyLanes" :key="L.k" class="tlane" :style="{ '--lc': L.c }">
+                                    <div class="lh"><span class="dot"></span><span class="t">{{ L.t }}</span><span class="n">{{ L.items.length }}</span><span class="h">{{ L.h }}</span></div>
+                                    <div v-for="t in L.items" :key="t.id" class="tk" :class="{ ended: L.k === 'done' }" style="--c:#e11d48">
+                                        <div class="stub"><span class="k">公差</span><span class="d">{{ t.date.split('-')[1] }}/{{ t.date.split('-')[2] }}</span><span class="w">{{ getWeekday(t.date) }}</span></div><div class="perf"></div><span class="notch t"></span><span class="notch b"></span>
+                                        <div v-if="isAdmin" class="adm"><button @click.stop="openEditTaskModal(t, 'duty')" aria-label="編輯"><i class="fa-solid fa-pen-to-square"></i></button><button @click.stop="confirmDeleteTask(t, 'duty')" aria-label="刪除"><i class="fa-solid fa-trash-can"></i></button></div>
+                                        <div class="bd">
+                                            <span v-if="isUserSignedUp(t.id)" class="badge"><i class="fa-solid fa-check"></i>我已報名</span>
+                                            <div class="ttl">{{ t.title }}</div>
+                                            <div class="mt"><span><i class="fa-solid fa-clock"></i><span class="font-num">{{ t.startTime }} – {{ t.endTime }}</span></span><span><i class="fa-solid fa-location-dot"></i><span>{{ t.location }}</span></span></div>
+                                            <div v-if="t.note" class="note"><i class="fa-solid fa-info-circle mr-1"></i>{{ t.note }}</div>
+                                            <div class="chips"><span v-for="name in getTaskParticipants(t.id)" :key="name">{{ name }}</span><em v-if="getTaskRegCount(t.id) === 0" class="text-[11px] font-bold text-slate-300 not-italic">尚未有人登記</em></div>
+                                            <div class="cap"><div class="r"><span>已報名</span><b>{{ getTaskRegCount(t.id) }} / {{ t.quota }}</b></div><div class="bar"><i :style="{ width: Math.min(100, t.quota ? getTaskRegCount(t.id) / t.quota * 100 : 0) + '%' }"></i></div></div>
+                                            <template v-if="L.k !== 'done'">
+                                                <button v-if="isAdmin && getTaskRegCount(t.id) < t.quota" class="btn out" @click="remindDutyShortage(t)" :disabled="isReminding === t.id"><i :class="isReminding === t.id ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-bullhorn'"></i>{{ isReminding === t.id ? '推播發送中...' : `全隊廣播：尚缺 ${t.quota - getTaskRegCount(t.id)} 人` }}</button>
+                                                <button v-if="!isUserSignedUp(t.id)" class="btn" :class="getTaskRegCount(t.id) >= t.quota ? 'mute' : 'pri'" @click="toggleRegistration(t, 'duty')" :disabled="getTaskRegCount(t.id) >= t.quota">{{ getTaskRegCount(t.id) >= t.quota ? '名額已滿' : '立即登記公差' }}</button>
+                                                <button v-else class="btn mute" @click="toggleRegistration(t, 'duty')">取消登記</button>
+                                            </template>
                                         </div>
-                                       
-                                          <template v-if="!isExpired(t.date)">
-                                            <!-- 🌟 公差缺額全隊推播按鈕 (僅管理員可見且有缺額時顯示) -->
-                                            <button v-if="isAdmin && getTaskRegCount(t.id) < t.quota" 
-                                                    @click="remindDutyShortage(t)" 
-                                                    :disabled="isReminding === t.id"
-                                                    class="w-full mb-3 py-3 rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 font-black text-[13px] active:scale-[0.98] transition-all flex justify-center items-center gap-2">
-                                                <i v-if="isReminding === t.id" class="fa-solid fa-spinner fa-spin"></i>
-                                                <i v-else class="fa-solid fa-bullhorn"></i>
-                                                {{ isReminding === t.id ? '推播發送中...' : `全隊廣播：尚缺 ${t.quota - getTaskRegCount(t.id)} 人` }}
-                                            </button>
-
-                                            <button v-if="!isUserSignedUp(t.id)" @click="toggleRegistration(t, 'duty')" :disabled="getTaskRegCount(t.id) >= t.quota" class="w-full py-4 rounded-2xl bg-rose-500 text-white font-black text-sm shadow-lg shadow-rose-200 active:scale-[0.98] transition-all disabled:opacity-30">{{ getTaskRegCount(t.id) >= t.quota ? '名額已滿' : '立即登記公差' }}</button>
-                                            <button v-else @click="toggleRegistration(t, 'duty')" class="w-full py-4 rounded-2xl bg-slate-100 text-slate-500 font-black text-sm active:scale-[0.98] transition-all">取消登記</button>
-                                        </template>
-                                        <div v-else class="w-full py-3 bg-slate-100 text-slate-400 text-center font-black text-xs rounded-xl uppercase tracking-widest">任務已結束</div>
                                     </div>
-                                </div>
+                                </section>
                             </div>
                         </div>
                     </div>
@@ -913,58 +934,39 @@
                                 <div><h3 class="text-xl font-black text-slate-800">會議/聚餐登記</h3></div>
                                 <button v-if="isAdmin" @click="openPostTaskModal('meeting')" class="h-10 px-4 rounded-xl bg-purple-500 text-white font-black text-xs shadow-sm"><i class="fa-solid fa-plus mr-1"></i> 發佈會議</button>
                             </div>
-                            <div class="space-y-5">
-                                <div v-for="t in filteredMeetingTasks" :key="t.id" class="list-card shadow-sm border-0 relative" :class="{ 'expired-task': isExpired(t.date) }">
-    <!-- 管理員操作按鈕區：編輯 與 刪除 -->
-    <div v-if="isAdmin" class="absolute top-3 right-3 flex items-center gap-1 z-10">
-        <button @click.stop="openEditTaskModal(t, 'meeting')" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-blue-500 hover:bg-blue-50 active:scale-95 transition-all">
-            <i class="fa-solid fa-pen-to-square text-xs"></i>
-        </button>
-        <button @click.stop="confirmDeleteTask(t, 'meeting')" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 active:scale-95 transition-all">
-            <i class="fa-solid fa-trash-can text-xs"></i>
-        </button>
-    </div>
-                                    <div class="p-5 task-card-header bg-slate-50/50 flex gap-4 items-stretch">
-                                        <div class="task-card-date-box border border-purple-100 flex flex-col justify-center"><p class="text-lg font-num text-slate-800 leading-none">{{ t.date.split('-')[1] }}/{{ t.date.split('-')[2] }}</p><p class="text-[10px] font-black text-purple-500 uppercase tracking-tighter mt-1">{{ getWeekday(t.date) }}</p></div>
-                                        <div class="flex-1 flex flex-col justify-center"><span class="type-tag inline-block mb-1.5 w-fit" :class="getCategoryClass(t.category)">{{ t.category || '一般會議' }}</span><h4 class="text-lg font-black text-slate-800 leading-tight">{{ t.title }}</h4></div>
-                                    </div>
-                                    <div class="p-5 space-y-4">
-                                        <div class="grid grid-cols-2 gap-4"><div class="flex items-center gap-3 text-xs font-bold text-slate-500"><i class="fa-solid fa-clock text-purple-400 w-4 text-center"></i> {{ t.startTime }} - {{ t.endTime }}</div><div class="flex items-center gap-3 text-xs font-bold text-slate-500"><i class="fa-solid fa-location-dot text-purple-400 w-4 text-center"></i> {{ t.location }}</div></div>
-                                        <div v-if="t.note" class="bg-purple-50/50 text-purple-700/80 p-3 rounded-xl text-[11px] font-bold border border-purple-100/50"><i class="fa-solid fa-comment-dots mr-1"></i> {{ t.note }}</div>
-                                        <div v-if="isAdmin && (t.category === '旅遊' || t.category === '聚餐')" class="flex gap-2 p-3 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
-                                            <div class="flex-1 text-center border-r border-indigo-100"><p class="text-[9px] font-black text-indigo-400 uppercase">預設大人</p><p class="text-sm font-num text-indigo-600">${{ formatNumber(t.priceAdult) }}</p></div>
-                                            <div class="flex-1 text-center"><p class="text-[9px] font-black text-indigo-400 uppercase">預設小孩</p><p class="text-sm font-num text-indigo-600">${{ formatNumber(t.priceChild) }}</p></div>
-                                        </div>
-                                        <div @click="openDetailedListModal(t)" class="bg-white border border-slate-100 rounded-2xl p-4 grid grid-cols-2 gap-y-3 gap-x-6 text-[11px] font-bold shadow-sm active:bg-slate-50 transition-colors cursor-pointer relative overflow-hidden">
-                                            <div class="absolute top-0 right-0 p-2 opacity-20"><i class="fa-solid fa-magnifying-glass-plus text-lg"></i></div>
-                                            <div class="flex items-center justify-between col-span-2 border-b border-dashed border-slate-100 pb-2 mb-1"><span class="text-slate-400">數據匯整 (點擊看名單)</span><span class="text-[10px] font-num text-indigo-600">{{ getFillingCount(t.id) }} / {{ members.length }} 已填</span></div>
-                                            <div class="flex items-baseline gap-1"><span class="text-emerald-600">出席：</span><span class="text-lg font-num">{{ getMeetingSummary(t.id).present }}</span><span class="text-[9px] opacity-40">人</span></div>
-                                            <div class="flex items-baseline gap-1"><span class="text-rose-400">請假：</span><span class="text-lg font-num">{{ getMeetingSummary(t.id).absent }}</span><span class="text-[9px] opacity-40">人</span></div>
-                                            <template v-if="t.category === '旅遊' || t.category === '聚餐'">
-                                                <div class="flex items-baseline gap-1"><span class="text-blue-600">攜伴(大)：</span><span class="text-lg font-num">{{ getMeetingSummary(t.id).plusAdult }}</span></div>
-                                                <div class="flex items-baseline gap-1"><span class="text-blue-400">攜伴(小)：</span><span class="text-lg font-num">{{ getMeetingSummary(t.id).plusChild }}</span></div>
-                                            </template>
-                                            <template v-else>
-                                                <div class="flex items-baseline gap-1"><span class="text-orange-600">葷食：</span><span class="text-lg font-num">{{ getMeetingSummary(t.id).meat }}</span><span class="text-[9px] opacity-40">份</span></div>
-                                                <div class="flex items-baseline gap-1"><span class="text-green-600">素食：</span><span class="text-lg font-num">{{ getMeetingSummary(t.id).veggie }}</span><span class="text-[9px] opacity-40">份</span></div>
+                            <div>
+                                <div v-if="!meetingLanes.length" class="tlempty">目前沒有會議或聚餐</div>
+                                <section v-for="L in meetingLanes" :key="L.k" class="tlane" :style="{ '--lc': L.c }">
+                                    <div class="lh"><span class="dot"></span><span class="t">{{ L.t }}</span><span class="n">{{ L.items.length }}</span><span class="h">{{ L.h }}</span></div>
+                                    <div v-for="t in L.items" :key="t.id" class="tk" :class="{ ended: L.k === 'done' }" style="--c:#7c3aed">
+                                        <div class="stub"><span class="k">會議</span><span class="d">{{ t.date.split('-')[1] }}/{{ t.date.split('-')[2] }}</span><span class="w">{{ getWeekday(t.date) }}</span></div><div class="perf"></div><span class="notch t"></span><span class="notch b"></span>
+                                        <div v-if="isAdmin" class="adm"><button @click.stop="openEditTaskModal(t, 'meeting')" aria-label="編輯"><i class="fa-solid fa-pen-to-square"></i></button><button @click.stop="confirmDeleteTask(t, 'meeting')" aria-label="刪除"><i class="fa-solid fa-trash-can"></i></button></div>
+                                        <div class="bd">
+                                            <span class="type-tag w-fit" :class="getCategoryClass(t.category)">{{ t.category || '一般會議' }}</span>
+                                            <div class="ttl">{{ t.title }}</div>
+                                            <div class="mt"><span><i class="fa-solid fa-clock"></i><span class="font-num">{{ t.startTime }} – {{ t.endTime }}</span></span><span><i class="fa-solid fa-location-dot"></i><span>{{ t.location }}</span></span></div>
+                                            <div v-if="t.note" class="note"><i class="fa-solid fa-comment-dots mr-1"></i>{{ t.note }}</div>
+                                            <div v-if="isAdmin && (t.category === '旅遊' || t.category === '聚餐')" class="fill"><span>預設大人 <b>${{ formatNumber(t.priceAdult) }}</b></span><span>預設小孩 <b>${{ formatNumber(t.priceChild) }}</b></span></div>
+                                            <div class="fill"><span>出席調查（點看名單）</span><b>{{ getFillingCount(t.id) }} / {{ members.length }} 已填</b></div>
+                                            <div class="rs" @click="openDetailedListModal(t)">
+                                                <div><div class="a" style="color:#059669">出席</div><div class="v">{{ getMeetingSummary(t.id).present }}</div></div>
+                                                <div><div class="a" style="color:#e11d48">請假</div><div class="v">{{ getMeetingSummary(t.id).absent }}</div></div>
+                                                <template v-if="t.category === '旅遊' || t.category === '聚餐'">
+                                                    <div><div class="a" style="color:#2563eb">攜伴大</div><div class="v">{{ getMeetingSummary(t.id).plusAdult }}</div></div>
+                                                    <div><div class="a" style="color:#60a5fa">攜伴小</div><div class="v">{{ getMeetingSummary(t.id).plusChild }}</div></div>
+                                                </template>
+                                                <template v-else>
+                                                    <div><div class="a" style="color:#ea580c">葷食</div><div class="v">{{ getMeetingSummary(t.id).meat }}</div></div>
+                                                    <div><div class="a" style="color:#16a34a">素食</div><div class="v">{{ getMeetingSummary(t.id).veggie }}</div></div>
+                                                </template>
+                                            </div>
+                                            <template v-if="L.k !== 'done'">
+                                                <button v-if="isAdmin && getUnfilledMembersList(t.id).length > 0" class="btn out" @click="remindUnfilledMeeting(t)" :disabled="isReminding === t.id"><i :class="isReminding === t.id ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-paper-plane'"></i>{{ isReminding === t.id ? '批次發送中...' : `提醒未填寫的 ${getUnfilledMembersList(t.id).length} 人` }}</button>
+                                                <button class="btn" :class="isUserSignedUp(t.id) ? 'mute' : 'pri'" @click="openMeetingRegModal(t)">{{ isUserSignedUp(t.id) ? '修改登記資訊' : '填寫出席調查' }}</button>
                                             </template>
                                         </div>
-                                        <template v-if="!isExpired(t.date)">
-                                            <!-- 🌟 會議未填寫私訊按鈕 (僅管理員可見) -->
-                                            <button v-if="isAdmin && getUnfilledMembersList(t.id).length > 0" 
-                                                    @click="remindUnfilledMeeting(t)" 
-                                                    :disabled="isReminding === t.id"
-                                                    class="w-full mb-3 py-3 rounded-2xl bg-purple-50 text-purple-600 border border-purple-200 font-black text-[13px] active:scale-[0.98] transition-all flex justify-center items-center gap-2">
-                                                <i v-if="isReminding === t.id" class="fa-solid fa-spinner fa-spin"></i>
-                                                <i v-else class="fa-solid fa-paper-plane-top"></i>
-                                                {{ isReminding === t.id ? '批次發送中...' : `一鍵私訊：提醒未填寫的 ${getUnfilledMembersList(t.id).length} 人` }}
-                                            </button>
-
-                                            <button @click="openMeetingRegModal(t)" class="w-full py-4 rounded-2xl bg-purple-600 text-white font-black text-sm shadow-lg shadow-purple-200 active:scale-[0.98] transition-all">{{ isUserSignedUp(t.id) ? '修改登記資訊' : '填寫出席調查' }}</button>
-                                        </template>
-                                        <div v-else class="w-full py-3 bg-slate-100 text-slate-400 text-center font-black text-xs rounded-xl uppercase tracking-widest">會議已結束</div>
                                     </div>
-                                </div>
+                                </section>
                             </div>
                         </div>
                     </div>
@@ -4563,6 +4565,24 @@ const openEmtRecordModal = () => {
             };
             const filteredOfficialTasks = computed(() => filterOldTasks(officialTasks.value));
             const filteredMeetingTasks = computed(() => filterOldTasks(meetingTasks.value));
+            const dutyLanes = computed(() => {
+                const L = [{ k: 'open', t: '報名中', c: '#e11d48', h: '還有名額', items: [] }, { k: 'full', t: '已額滿', c: '#94a3b8', h: '', items: [] }, { k: 'done', t: '已結束', c: '#cbd5e1', h: '', items: [] }];
+                filteredOfficialTasks.value.forEach(t => {
+                    if (isExpired(t.date)) L[2].items.push(t);
+                    else if (getTaskRegCount(t.id) >= t.quota) L[1].items.push(t);
+                    else L[0].items.push(t);
+                });
+                return L.filter(x => x.items.length);
+            });
+            const meetingLanes = computed(() => {
+                const L = [{ k: 'todo', t: '需要你處理', c: '#7c3aed', h: '還沒填出席調查', items: [] }, { k: 'filled', t: '已填寫', c: '#059669', h: '可以再修改', items: [] }, { k: 'done', t: '已結束', c: '#cbd5e1', h: '', items: [] }];
+                filteredMeetingTasks.value.forEach(t => {
+                    if (isExpired(t.date)) L[2].items.push(t);
+                    else if (isUserSignedUp(t.id)) L[1].items.push(t);
+                    else L[0].items.push(t);
+                });
+                return L.filter(x => x.items.length);
+            });
 
         const openPostTaskModal = (type) => {
     editingTaskId.value = null; // 確保是新增模式
@@ -7465,7 +7485,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 currentWeekStart, weekDates, currentWeekRangeText, changeWeek, hasShift, isPastDate, hourOptions,
                 isShiftModalOpen, isDeleteShiftModalOpen, selectedDay, tempStartTime, tempEndTime, isHourDisabled, isMyShift, userShifts,
                 currentCalendarDate, calendarTitle, calendarCells, changeCalendarMonth, getShiftsForCell, getShiftsCount, getWeekday,
-                officialTasks, meetingTasks, filteredOfficialTasks, filteredMeetingTasks, isPostModalOpen, postType, newTask, postToLine, isFillingTraining, fillMonthlyTraining,
+                officialTasks, meetingTasks, filteredOfficialTasks, filteredMeetingTasks, dutyLanes, meetingLanes, isPostModalOpen, postType, newTask, postToLine, isFillingTraining, fillMonthlyTraining,
                     editingTaskId, sendEditPush, openEditTaskModal, 
                     openPostTaskModal, handlePostTask, handleDeleteTask, getTaskRegCount, getTaskParticipants, isUserSignedUp, toggleRegistration,
                 isMeetingRegModalOpen, regForm, openMeetingRegModal, submitMeetingReg, currentTask, getMeetingSummary, getDetailedRegs, getCategoryClass, isExpired, getFillingCount,
