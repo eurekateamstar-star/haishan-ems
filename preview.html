@@ -617,6 +617,15 @@
         .org .org-n.ld.dep{background:color-mix(in srgb,var(--sc) 78%,#fff) !important}
         .org .org-mem{background:none !important;border:0 !important;padding:0 !important;gap:3px}
         .org .org-mem button{background:#fff !important;border-radius:8px;padding:6px 0}
+        .org .org-z{border-radius:16px;transition:box-shadow .12s,background .12s}
+        .org.dragging .org-z{box-shadow:0 0 0 2px #cbd5e1 inset}
+        .org .org-z.hov{box-shadow:0 0 0 3px #2563eb inset !important;background:#eff6ff}
+        .org .org-lv.org-z{padding:4px}
+        .org .lift{opacity:.35}
+        .org button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+        .org .org-n.empty{opacity:.45;cursor:default}
+        .org .org-empty{display:block;text-align:center;font-size:11px;font-weight:800;color:#94a3b8;border:1.5px dashed #cbd5e1;border-radius:8px;padding:6px 0}
+        .org-ghost{position:fixed;z-index:120;transform:translate(-50%,-130%);pointer-events:none;background:#0f172a;color:#fff;font-size:15px;font-weight:900;padding:8px 14px;border-radius:12px;box-shadow:0 12px 24px -8px rgba(15,23,42,.6)}
         .ov-none{font-size:12px;font-weight:700;color:#cbd5e1;margin-top:6px}
         .ov-row{display:flex;align-items:center;gap:10px;cursor:pointer}
         .ov-nm{width:70px;flex-shrink:0}.ov-nm b{display:block;font-size:14px;font-weight:900;color:#0f172a}.ov-nm small{font-size:10px;font-weight:800;color:#94a3b8}
@@ -1334,25 +1343,41 @@
                     </template>
                 </div>
                 <!-- 組織圖 -->
-                <div v-if="isAdmin && conView === '組織'" class="ov-wrap org">
-                    <div class="ov-hd"><b>分隊組織圖</b><small>{{ ovMembers.length }} 人・點名字進個人編輯</small></div>
-                    <div class="org-lv">
-                        <button v-for="m in orgTree.chief" :key="m.姓名" class="org-n top" @click="memOpen(m)"><small>分隊長</small><b>{{ m.姓名 }}</b></button>
+                <div v-if="isAdmin && conView === '組織'" class="ov-wrap org" :class="{ dragging: orgDrag }">
+                    <div class="ov-hd"><b>分隊組織圖</b><small>{{ ovMembers.length }} 人・長按拖曳可換位置</small></div>
+                    <div class="org-lv org-z" data-drop="chief" :class="{ hov: orgHover === 'chief' }">
+                        <button v-for="m in orgTree.chief" :key="m.姓名" class="org-n top" :class="{ lift: orgDrag && orgDrag.m.姓名 === m.姓名 }" @mousedown="orgStart($event, m)" @touchstart="orgStart($event, m)" @click="orgClick(m)"><small>分隊長</small><b>{{ m.姓名 }}</b></button>
                         <div v-if="!orgTree.chief.length" class="org-n top empty"><small>分隊長</small><b>未設定</b></div>
                     </div>
                     <div class="org-v"></div>
-                    <div class="org-lv">
-                        <button v-for="m in orgTree.deputy" :key="m.姓名" class="org-n mid" @click="memOpen(m)"><small>副分隊長</small><b>{{ m.姓名 }}</b></button>
+                    <div class="org-lv org-z" data-drop="deputy" :class="{ hov: orgHover === 'deputy' }">
+                        <button v-for="m in orgTree.deputy" :key="m.姓名" class="org-n mid" :class="{ lift: orgDrag && orgDrag.m.姓名 === m.姓名 }" @mousedown="orgStart($event, m)" @touchstart="orgStart($event, m)" @click="orgClick(m)"><small>副分隊長</small><b>{{ m.姓名 }}</b></button>
+                        <div v-if="!orgTree.deputy.length" class="org-n mid empty"><small>副分隊長</small><b>未設定</b></div>
                     </div>
-                    <div v-if="orgTree.staff.length" class="org-staff"><button v-for="m in orgTree.staff" :key="m.姓名" class="org-n stf" @click="memOpen(m)"><small>{{ m.duty_title }}</small><b>{{ m.姓名 }}</b></button></div>
+                    <div class="org-staff org-z" data-drop="staff" :class="{ hov: orgHover === 'staff' }">
+                        <button v-for="m in orgTree.staff" :key="m.姓名" class="org-n stf" :class="{ lift: orgDrag && orgDrag.m.姓名 === m.姓名 }" @mousedown="orgStart($event, m)" @touchstart="orgStart($event, m)" @click="orgClick(m)"><small>{{ m.duty_title }}</small><b>{{ m.姓名 }}</b></button>
+                        <div v-if="!orgTree.staff.length" class="org-n stf empty"><small>幹部</small><b>拖到這裡</b></div>
+                    </div>
                     <div class="org-v"></div>
                     <div class="org-bus" :style="{ '--n': orgTree.squads.length }"></div>
                     <div class="org-cols" :style="{ gridTemplateColumns: 'repeat(' + orgTree.squads.length + ', minmax(0,1fr))' }">
-                        <section v-for="(sq, si) in orgTree.squads" :key="sq.name" class="org-sq" :style="{ '--sc': ['#0f766e', '#2563eb', '#c2410c', '#7c3aed', '#be123c'][si % 5] }">
+                        <section v-for="(sq, si) in orgTree.squads" :key="sq.name" class="org-sq org-z" :data-drop="'sq:' + sq.name" :class="{ hov: orgHover === 'sq:' + sq.name }" :style="{ '--sc': ['#0f766e', '#2563eb', '#c2410c', '#7c3aed', '#be123c'][si % 5] }">
                             <div class="org-sqh">{{ sq.name }}<em>{{ sq.all }}人</em></div>
-                            <button v-for="m in sq.lead" :key="m.姓名" class="org-n ld" :class="{ dep: m.duty_title !== '小隊長' }" @click="memOpen(m)"><small>{{ m.duty_title }}</small><b>{{ m.姓名 }}</b></button>
-                            <div v-if="sq.members.length" class="org-mem"><button v-for="m in sq.members" :key="m.姓名" @click="memOpen(m)">{{ m.姓名 }}</button></div>
+                            <button v-for="m in sq.lead" :key="m.姓名" class="org-n ld" :class="{ dep: m.duty_title !== '小隊長', lift: orgDrag && orgDrag.m.姓名 === m.姓名 }" @mousedown="orgStart($event, m)" @touchstart="orgStart($event, m)" @click="orgClick(m)"><small>{{ m.duty_title }}</small><b>{{ m.姓名 }}</b></button>
+                            <div class="org-mem"><button v-for="m in sq.members" :key="m.姓名" :class="{ lift: orgDrag && orgDrag.m.姓名 === m.姓名 }" @mousedown="orgStart($event, m)" @touchstart="orgStart($event, m)" @click="orgClick(m)">{{ m.姓名 }}</button><span v-if="!sq.members.length" class="org-empty">拖到這裡</span></div>
                         </section>
+                    </div>
+                    <div class="ov-tip">點名字進個人編輯・按住名字半秒就能拖到別的位置</div>
+                </div>
+                <div v-if="orgDrag && orgDrag.on" class="org-ghost" :style="{ left: orgDrag.x + 'px', top: orgDrag.y + 'px' }">{{ orgDrag.m.姓名 }}</div>
+                <div v-if="orgMove" class="rsheet-bg" style="z-index:96" @click.self="orgMove = null">
+                    <div class="rsheet" style="--c:#0f172a">
+                        <div class="grab"></div>
+                        <div class="sh">調整位置<button @click="orgMove = null" aria-label="關閉"><i class="fa-solid fa-xmark"></i></button></div>
+                        <div class="yp-sub"><b style="color:#0f172a">{{ orgMove.m.姓名 }}</b>：{{ orgMove.m.duty_group || '未分組' }}・{{ orgMove.m.duty_title || '隊員' }} → <b style="color:#0f172a">{{ orgMove.group }}</b></div>
+                        <div class="yp-sub">新的職稱</div>
+                        <div class="af-chips"><button v-for="t in orgMove.options" :key="t" :class="{ on: orgMove.title === t }" @click="orgMove.title = t">{{ t }}</button></div>
+                        <div class="afs-btns"><button class="sec" @click="orgMove = null">取消</button><button class="pri" :disabled="orgSaving" @click="orgSave">{{ orgSaving ? '儲存中…' : '確定移動' }}</button></div>
                     </div>
                 </div>
                 <!-- 全員：證照 -->
@@ -7464,6 +7489,55 @@ const handleTimeInput = (item, field, formType) => {
             const conView = ref('隊員'), ovMedalBy = ref('table'), ovCertFilter = ref('全部');
             const ovMedalVal = (m, mId) => { const k = Object.keys(m).find((x) => x.startsWith('medal_') && mId.split(/[- \n]+/).every((p) => x.includes(p))); const v = k ? m[k] : ''; return v && v !== '無' ? String(v) : ''; };
             const ovMembers = computed(() => adminMembersData.value.filter((m) => !m.is_suspended));
+            const orgDrag = ref(null), orgHover = ref(''), orgMove = ref(null), orgSaving = ref(false);
+            let orgTimer = null, orgDragged = false, orgS = null;
+            const orgXY = (e) => { const t = e.touches ? (e.touches[0] || e.changedTouches[0]) : e; return { x: t.clientX, y: t.clientY }; };
+            const orgZoneAt = (x, y) => { const el = document.elementFromPoint(x, y); const z = el && el.closest('[data-drop]'); return z ? z.getAttribute('data-drop') : ''; };
+            const orgOff = () => {
+                clearTimeout(orgTimer);
+                window.removeEventListener('touchmove', orgMoveH, { passive: false }); window.removeEventListener('mousemove', orgMoveH);
+                window.removeEventListener('touchend', orgEnd); window.removeEventListener('touchcancel', orgEnd); window.removeEventListener('mouseup', orgEnd);
+            };
+            const orgStart = (e, m) => {
+                if (e.button) return;
+                orgS = orgXY(e); orgDragged = false;
+                orgDrag.value = { m, on: false, x: orgS.x, y: orgS.y };
+                orgTimer = setTimeout(() => { if (!orgDrag.value) return; orgDrag.value.on = true; orgDragged = true; if (navigator.vibrate) navigator.vibrate(15); }, 450);
+                window.addEventListener('touchmove', orgMoveH, { passive: false }); window.addEventListener('mousemove', orgMoveH);
+                window.addEventListener('touchend', orgEnd); window.addEventListener('touchcancel', orgEnd); window.addEventListener('mouseup', orgEnd);
+            };
+            function orgMoveH(e) {
+                const d = orgDrag.value; if (!d) return;
+                const p = orgXY(e);
+                if (!d.on) { if (Math.hypot(p.x - orgS.x, p.y - orgS.y) > 8) { orgOff(); orgDrag.value = null; } return; }
+                if (e.cancelable) e.preventDefault();
+                d.x = p.x; d.y = p.y; orgHover.value = orgZoneAt(p.x, p.y);
+            }
+            function orgEnd(e) {
+                const d = orgDrag.value; orgOff();
+                if (d && d.on) {
+                    const z = orgZoneAt(d.x, d.y); orgHover.value = '';
+                    if (z) {
+                        const cur = d.m.duty_title || '隊員';
+                        let group = '幹部', options, title;
+                        if (z === 'chief') { options = ['分隊長']; title = '分隊長'; }
+                        else if (z === 'deputy') { options = ['副分隊長']; title = '副分隊長'; }
+                        else if (z === 'staff') { options = ['幹事', '助理幹事']; title = options.includes(cur) ? cur : '幹事'; }
+                        else { group = z.slice(3); options = ['小隊長', '副小隊長', '隊員']; title = d.m.duty_group === group && options.includes(cur) ? cur : '隊員'; }
+                        if (!(group === (d.m.duty_group || '') && title === cur && options.length === 1)) orgMove.value = { m: d.m, group, options, title };
+                    }
+                }
+                orgDrag.value = null;
+                if (orgDragged) setTimeout(() => { orgDragged = false; }, 50);
+            }
+            const orgClick = (m) => { if (orgDragged) return; memOpen(m); };
+            const orgSave = async () => {
+                const mv = orgMove.value; if (!mv || orgSaving.value) return;
+                orgSaving.value = true;
+                try { await updateDoc(doc(db, 'members', mv.m.id), { duty_group: mv.group, duty_title: mv.title }); orgMove.value = null; }
+                catch (e) { showAppAlert('error', '提示', '移動失敗：' + e.message); }
+                finally { orgSaving.value = false; }
+            };
             const orgTree = computed(() => {
                 const all = ovMembers.value, T = (m) => m.duty_title || '隊員';
                 const chief = all.filter((m) => T(m) === '分隊長'), deputy = all.filter((m) => T(m) === '副分隊長');
@@ -8247,7 +8321,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 openAdminDeleteActivity, adminDeleteableActivities, confirmAdminDeleteAct, executeAdminDeleteAct,isMemberHistoryModalOpen, selectedDutyMember, openMemberDutyHistory, selectedMemberDutyHistory,
                 
                 // 協勤專屬
-                assistanceStep, assistanceForm, afTried, afConfirm, afHours, conView, orgTree, yp, ypPick, ypSaving, ypYears, ypOpen, ypDone, ovEditMedal, ovMedalBy, OV_GROUPS, ovMedalCols, ovMedalVal, ovMembers, ovCertFilter, ovMedals, ovMedalPeople, ovCerts, ovHours, ovHoursMax, meMenu, bindNeedId, meAvatar, meAvatarBad, meOpenConsole, mePrevPage, MEM_TABS, memTab, memSecret, memSecretErr, memOpen, memLeft, memHistKeys, memHistTotal, memHistPct, memSave, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
+                assistanceStep, assistanceForm, afTried, afConfirm, afHours, conView, orgTree, orgDrag, orgHover, orgMove, orgSaving, orgStart, orgClick, orgSave, yp, ypPick, ypSaving, ypYears, ypOpen, ypDone, ovEditMedal, ovMedalBy, OV_GROUPS, ovMedalCols, ovMedalVal, ovMembers, ovCertFilter, ovMedals, ovMedalPeople, ovCerts, ovHours, ovHoursMax, meMenu, bindNeedId, meAvatar, meAvatarBad, meOpenConsole, mePrevPage, MEM_TABS, memTab, memSecret, memSecretErr, memOpen, memLeft, memHistKeys, memHistTotal, memHistPct, memSave, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
                 isAssistTimeModalOpen, assistTempStart, assistTempEnd, openAssistTimeModal, selectAssistHour, resetAssistTimeSelection, confirmAssistTime, isAssistHourDisabled,
                 activeAssistTab, visibleAssistTabs, assistSlider, assistTabsScrollRef, scrollToAssistTab, onAssistSliderScroll, dynamicMemberHours,displayEmtExpiry,exportPaymentRequestToExcel,
                 myAssistanceRecords, allAssistanceRecords, isAssistEditModalOpen, editingAssistRecord, openAssistEditModal, submitAssistEdit, deleteAssistRecord, handleTimeInput,
