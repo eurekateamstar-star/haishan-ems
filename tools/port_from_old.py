@@ -509,6 +509,167 @@ rep('''>PUSH NOTIFICATION ADMIN</p>''', '''>MEMBER ADMIN</p>''')
 rep('''推播紀錄依昨日 <span class="font-black text-slate-600">push_logs</span> 判斷。''', '''右上角綠色 LINE 標記代表已綁定。''')
 
 # ---------------------------------------------------------------------
+# 6e. 救護分頁（取代舊網站的「常訓」iframe）：救護手冊、單項技術、藥物小卡
+#     直接寫在新網站裡，不再嵌入 Regular（Regular 會讀舊 Firestore 的隊員資料）
+# ---------------------------------------------------------------------
+# 藥物小卡 PDF：先找新網站自己的 assets/medications.pdf，沒有就讀舊的 Firebase Storage 公開檔
+MED_PDF_FIREBASE = 'https://firebasestorage.googleapis.com/v0/b/star-c5e91.firebasestorage.app/o/medications.pdf?alt=media'
+
+rep('''        .tab-item { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; cursor: pointer; }''',
+'''        .tab-item { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        /* 救護分頁 */
+        .rescue-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: calc(90px + var(--safe-bottom)); }
+        .book-scene { perspective: 1200px; }
+        .book-body { box-shadow: 1px 0px 0px #fff, 2px 0px 0px #cbd5e1, 3px 0px 0px #fff, 4px 0px 0px #94a3b8, 5px 0px 0px #fff, 6px 0px 0px #64748b, 12px 15px 30px rgba(0,0,0,0.18); transform-style: preserve-3d; }
+        .book-cover { transform-origin: left center; transition: transform 0.4s ease-out, box-shadow 0.4s ease-out; transform: translateZ(1px); }
+        .book-scene:active .book-cover, .book-scene:hover .book-cover { transform: rotateY(-25deg) translateZ(1px); box-shadow: 15px 10px 25px rgba(0,0,0,0.25); }
+        .pdf-slider { display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; width: 100%; scrollbar-width: none; }
+        .pdf-slider::-webkit-scrollbar { display: none; }
+        .pdf-page-container { flex: 0 0 100%; scroll-snap-align: center; display: flex; justify-content: center; align-items: flex-start; }
+        .canvas-wrapper { width: 100%; padding-bottom: 112%; position: relative; overflow: hidden; background: #fff; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .canvas-wrapper canvas { position: absolute; top: 50%; left: 50%; width: 102%; height: auto; transform: translate(-50%, -50%); }''')
+
+BOOK = lambda key, title, color, ebook: f'''
+                <div v-show="activeRescueTab === '{key}'" class="fade-in flex flex-col pt-6 px-6">
+                    <div class="text-center mb-6">
+                        <h2 class="text-lg font-black text-slate-800 tracking-wider">內政部消防署 <span class="{color}">{title}</span></h2>
+                        <p class="text-[11px] font-bold text-slate-400 mt-1"><i class="fa-solid fa-hand-pointer mr-1"></i>點擊下方掀開書本</p>
+                    </div>
+                    <div class="flex flex-col items-center pt-2 pb-8">
+                        <a href="https://ebook.nfa.gov.tw/{ebook}/mobile/index.html#p=1" target="_blank" rel="noopener noreferrer" class="book-scene relative block w-[85%] max-w-[340px]">
+                            <div class="book-body relative w-full bg-[#f8fafc] border-l-[3px] border-slate-400 aspect-[1/1.4] rounded-sm">
+                                <div class="book-cover absolute inset-0 w-full h-full bg-white z-10 overflow-hidden border border-slate-100 rounded-sm">
+                                    <img src="https://ebook.nfa.gov.tw/{ebook}/files/mobile/1.jpg" alt="{title}封面" class="w-full h-full object-cover block" loading="lazy">
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>'''
+
+rep('''        <!-- 協勤登記頁面 (與 dashboard / schedule 同級切換) -->''',
+'''        <!-- 救護頁面：救護手冊、單項技術、藥物小卡 -->
+        <div v-else-if="currPage === 'rescue'" class="dashboard-wrapper fade-in">
+            <div class="tabs-section">
+                <div class="tabs-scroll-container">
+                    <div v-for="tab in rescueTabs" :key="tab.id" @click="activeRescueTab = tab.id" class="tab-item">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-2 shadow-sm transition-all" :class="activeRescueTab === tab.id ? tab.activeClass : 'bg-white text-slate-300 border border-slate-100'"><i :class="tab.icon" class="text-xl"></i></div>
+                        <span class="text-[11px] font-black" :class="activeRescueTab === tab.id ? tab.textColor : 'text-slate-400'">{{ tab.name }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="rescue-body" @touchstart.passive="onRescueTouchStart" @touchend="onRescueTouchEnd">'''
++ BOOK('manual', '救護手冊', 'text-emerald-500', '1140527')
++ BOOK('skill', '單項技術', 'text-orange-500', '1140526') + '''
+                <div v-show="activeRescueTab === 'medication'" class="fade-in flex flex-col w-full">
+                    <div class="flex justify-between items-center pt-4 pb-2 px-6">
+                        <h2 class="text-xl font-black text-slate-800 tracking-wider">藥物小卡</h2>
+                        <div v-if="medTotalPages > 0" class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-black shadow-sm font-num">{{ medCurrentPage }} / {{ medTotalPages }}</div>
+                    </div>
+                    <div v-if="medPdfLoading" class="min-h-[300px] flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-spinner fa-spin text-3xl text-red-400 mb-3"></i>
+                        <p class="text-sm font-black text-slate-400 tracking-widest">繪製小卡中...</p>
+                    </div>
+                    <div v-else-if="medPdfError" class="min-h-[300px] flex flex-col items-center justify-center gap-3 px-6 text-center">
+                        <i class="fa-solid fa-triangle-exclamation text-3xl text-slate-300"></i>
+                        <p class="text-sm font-black text-slate-400">藥物小卡載入失敗</p>
+                        <button @click="loadMedPdf(true)" class="px-5 py-2.5 rounded-xl bg-red-500 text-white text-sm font-black active:scale-95">重新載入</button>
+                    </div>
+                    <div v-show="!medPdfLoading && !medPdfError" class="pdf-slider" @scroll="onMedSliderScroll">
+                        <div v-for="n in medTotalPages" :key="n" class="pdf-page-container">
+                            <div class="canvas-wrapper"><canvas :id="'med-canvas-' + n"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 協勤登記頁面 (與 dashboard / schedule 同級切換) -->''')
+
+# 底部導覽列：協勤後面加「救護」
+rep('''<span class="text-[13px] font-black mt-1">協勤</span></div>''',
+    '''<span class="text-[13px] font-black mt-1">協勤</span></div>
+                <div @click="currPage='rescue'" :class="currPage === 'rescue' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-briefcase-medical text-xl"></i><span class="text-[13px] font-black mt-1">救護</span></div>''')
+
+# ?page=rescue 也可以直接打開
+rep("if (['dashboard', 'schedule', 'assistance'].includes(page)) currPage.value = page;",
+    "if (['dashboard', 'schedule', 'assistance', 'rescue'].includes(page)) currPage.value = page;")
+
+# 程式：分頁狀態、左右滑動切換、藥物小卡 PDF（第一次打開救護頁才下載 pdf.js 與 PDF）
+rep('''            return {
+                isAdmin, currPage,''', '''            // ===== 救護分頁 =====
+            const rescueTabs = [
+                { id: 'manual',     name: '救護手冊', icon: 'fa-solid fa-book-medical', activeClass: 'bg-emerald-500 text-white shadow-md', textColor: 'text-emerald-500' },
+                { id: 'skill',      name: '單項技術', icon: 'fa-solid fa-kit-medical',  activeClass: 'bg-orange-500 text-white shadow-md',  textColor: 'text-orange-500' },
+                { id: 'medication', name: '藥物小卡', icon: 'fa-solid fa-pills',        activeClass: 'bg-red-500 text-white shadow-md',     textColor: 'text-red-500' },
+            ];
+            const activeRescueTab = ref('manual');
+            let rescueTouchX = 0, rescueTouchY = 0;
+            const onRescueTouchStart = (e) => { rescueTouchX = e.changedTouches[0].screenX; rescueTouchY = e.changedTouches[0].screenY; };
+            const onRescueTouchEnd = (e) => {
+                if (e.target.closest('.pdf-slider')) return; // 藥物小卡左右滑是翻頁
+                const dx = e.changedTouches[0].screenX - rescueTouchX, dy = e.changedTouches[0].screenY - rescueTouchY;
+                if (Math.abs(dx) <= Math.abs(dy) || Math.abs(dx) < 50) return;
+                const i = rescueTabs.findIndex(t => t.id === activeRescueTab.value);
+                const j = dx < 0 ? Math.min(i + 1, rescueTabs.length - 1) : Math.max(i - 1, 0);
+                activeRescueTab.value = rescueTabs[j].id;
+            };
+
+            const MED_PDF_URLS = ['./assets/medications.pdf', ''' + repr(MED_PDF_FIREBASE) + '''];
+            const medTotalPages = ref(0), medCurrentPage = ref(1), medPdfLoading = ref(false), medPdfError = ref(false);
+            let pdfjsPromise = null, medPdfDoc = null;
+            const loadPdfJs = () => pdfjsPromise || (pdfjsPromise = new Promise((resolve, reject) => {
+                if (window.pdfjsLib) return resolve(window.pdfjsLib);
+                const sc = document.createElement('script');
+                sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+                sc.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; resolve(window.pdfjsLib); };
+                sc.onerror = () => { pdfjsPromise = null; reject(new Error('pdf.js 載入失敗')); };
+                document.head.appendChild(sc);
+            }));
+            const loadMedPdf = async (retry = false) => {
+                if (medPdfLoading.value || (medTotalPages.value > 0 && !retry)) return;
+                medPdfLoading.value = true; medPdfError.value = false;
+                try {
+                    const pdfjs = await loadPdfJs();
+                    let pdf = medPdfDoc;
+                    for (const url of (pdf ? [] : MED_PDF_URLS)) {
+                        try { pdf = await pdfjs.getDocument(url).promise; break; } catch (e) { console.warn('藥物小卡讀取失敗', url, e); }
+                    }
+                    if (!pdf) throw new Error('找不到藥物小卡 PDF');
+                    medPdfDoc = pdf;
+                    medTotalPages.value = pdf.numPages;
+                    await nextTick();
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        try {
+                            const page = await pdf.getPage(i);
+                            const canvas = document.getElementById('med-canvas-' + i);
+                            if (canvas) {
+                                const viewport = page.getViewport({ scale: 1.8 });
+                                canvas.width = viewport.width; canvas.height = viewport.height;
+                                await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                            }
+                        } catch (e) { console.warn('第 ' + i + ' 頁繪製失敗', e); }
+                        if (i === Math.min(2, pdf.numPages)) medPdfLoading.value = false;
+                        await new Promise(r => setTimeout(r, 60));
+                    }
+                } catch (e) {
+                    console.warn(e);
+                    medTotalPages.value = 0; medPdfError.value = true;
+                } finally {
+                    medPdfLoading.value = false;
+                }
+            };
+            const onMedSliderScroll = (e) => { const w = e.target.offsetWidth; if (w > 0) medCurrentPage.value = Math.round(e.target.scrollLeft / w) + 1; };
+            // 進入救護頁就在背景準備藥物小卡；切換頁面時畫布會重建，所以回來時重新繪製
+            watch(currPage, (p, old) => {
+                if (p === 'rescue' && !medPdfLoading.value) { medTotalPages.value = 0; medCurrentPage.value = 1; nextTick(() => loadMedPdf()); }
+            });
+
+            return {
+                rescueTabs, activeRescueTab, onRescueTouchStart, onRescueTouchEnd,
+                medTotalPages, medCurrentPage, medPdfLoading, medPdfError, loadMedPdf, onMedSliderScroll,
+                isAdmin, currPage,''')
+
+# ---------------------------------------------------------------------
 # 7. 程式檔加上版本號，避免手機快取到「新網頁 + 舊程式」
 # ---------------------------------------------------------------------
 import time as _time
