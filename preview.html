@@ -308,6 +308,20 @@
         .tk.ended .stub{background:#94a3b8}.tk.ended{opacity:.72}
         .tk.flash{animation:tkflash 1.6s ease}@keyframes tkflash{0%,40%{box-shadow:0 0 0 3px var(--c),0 10px 22px -18px rgba(15,23,42,.35)}100%{box-shadow:0 1px 2px rgba(15,23,42,.04),0 10px 22px -18px rgba(15,23,42,.35)}}
         .pend-h{font-size:11px;font-weight:800;color:#8a94a6;padding:10px 0 2px}
+        .tapc{cursor:pointer}.tapc .l i{font-size:8px;margin-left:4px;opacity:.6}
+        .rsheet-bg{position:fixed;inset:0;z-index:90;background:rgba(15,23,42,.38);display:flex;align-items:flex-end;justify-content:center}
+        .rsheet{width:100%;max-width:480px;max-height:72vh;overflow-y:auto;background:#fff;border-radius:24px 24px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom))}
+        .rsheet .grab{width:38px;height:5px;border-radius:3px;background:#e2e8f0;margin:0 auto 10px}
+        .rsheet .sh{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:900;color:#0f172a;margin-bottom:8px}
+        .rsheet .sh button{all:unset;margin-left:auto;width:32px;height:32px;border-radius:16px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#64748b;cursor:pointer}
+        .rsheet .it{display:flex;gap:12px;padding:12px 0;border-top:1px solid #f1f3f6}
+        .rsheet .it .db{width:48px;height:52px;border-radius:13px;flex-shrink:0;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--c)}
+        .rsheet .it .db b{font-family:Inter,sans-serif;font-size:15px}.rsheet .it .db span{font-size:10px;font-weight:700;opacity:.9}
+        .rsheet .it .tt{font-size:15px;font-weight:900;color:#0f172a}
+        .rsheet .it .mm{font-size:12px;color:#64748b;font-weight:600;margin-top:2px;display:flex;flex-direction:column;gap:2px}
+        .rsheet .it .tg{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}.rsheet .it .tg span{font-size:11px;font-weight:800;padding:2px 7px;border-radius:7px;background:#f1f5f9;color:#475569}
+        .rsheet .go{all:unset;align-self:center;font-size:12px;font-weight:900;color:var(--c);cursor:pointer;white-space:nowrap}
+        .rsheet .none{padding:22px 0;text-align:center;font-size:13px;font-weight:800;color:#94a3b8}
         .tlempty{background:#fff;border-radius:18px;border:1px dashed #e2e8f0;padding:22px;text-align:center;font-size:13px;font-weight:800;color:#94a3b8}
         /* ===== 新版（質感版） ===== */
         html, body, #app, header.bg-\[\#f1f5f9\], .tabs-section{background-color:#f3f5f9!important}
@@ -777,28 +791,20 @@
         <div v-else-if="currPage === 'schedule'" class="dashboard-wrapper fade-in pg-green">
            <div v-show="schedView === 'home'" class="page-home" @touchstart="onPageTouchStart($event)" @touchmove="onPageTouchMove($event)">
                 <div class="ptitle pg-green-acc"><span class="pemb g-green"><i class="fa-solid fa-calendar-days"></i></span><div><div class="zh">排班</div><div class="en">DUTY SCHEDULE</div></div><span class="chip">本週 {{ myWeekShiftCount }} 班</span></div>
-                <section class="pcard pstats pg-green-acc" style="--bar:linear-gradient(90deg,#065f46,#10b981)"><div><div class="l">下一班</div><div class="v">{{ nextMyShiftDate || '—' }}<small>{{ nextMyShiftTime }}</small></div></div><div><div class="l">近期公差</div><div class="v">{{ upcomingDutyCount }}<small>場</small></div></div><div><div class="l">近期會議</div><div class="v">{{ upcomingMeetingCount }}<small>場</small></div></div></section>
+                <section class="pcard pstats pg-green-acc" style="--bar:linear-gradient(90deg,#065f46,#10b981)"><div><div class="l">下一班</div><div class="v">{{ nextMyShiftDate || '—' }}<small>{{ nextMyShiftTime }}</small></div></div><div class="tapc" role="button" @click="regSheet = 'duty'"><div class="l">近期公差<i class="fa-solid fa-chevron-right"></i></div><div class="v">{{ upcomingDutyCount }}<small>場</small></div></div><div class="tapc" role="button" @click="regSheet = 'meeting'"><div class="l">近期會議<i class="fa-solid fa-chevron-right"></i></div><div class="v">{{ upcomingMeetingCount }}<small>場</small></div></div></section>
                 <div class="fgrid">
                     <button v-for="(tab, index) in visibleScheduleTabs" :key="tab.id" class="fitem" @click="openSchedTab(index)">
                         <span class="ftile" :style="{ background: tabTint(tab.id) + '14', color: tabTint(tab.id) }"><i :class="tab.icon" style="font-size:19px"></i></span>{{ tab.name }}
                     </button>
                 </div>
                 <button v-if="dutyShortage" class="pbanner" style="--bc:#e11d48" @click="openSchedTab(visibleScheduleTabs.findIndex(t => t.id === 'duty_reg'))"><span class="ic"><i class="fa-solid fa-bullhorn"></i></span><span class="flex-1">公差「{{ dutyShortage.title }}」還缺 {{ dutyShortage.lack }} 人</span><i class="fa-solid fa-chevron-right text-xs text-slate-300"></i></button>
-                <section class="pcard psec">
-                    <div class="hd"><span>本週登記提醒</span><button @click="openSchedTab(0)">登記 ›</button></div>
-                    <div v-for="(r, idx) in activeReminders.slice(0, 5)" :key="'rm' + idx" class="prow"><span class="ic" style="background:#05966914;color:#059669"><i class="fa-solid fa-bell-concierge"></i></span><div class="min-w-0"><div class="t truncate">{{ r.label }}</div><div class="s font-num">{{ r.dateDisplay }}</div></div><span class="v" style="font-size:12px;color:#059669;background:#ecfdf5;padding:3px 8px;border-radius:8px">{{ getTimeDistanceLabel(r.fullDate) }}</span></div>
-                    <div v-if="!activeReminders.length" class="flex items-center gap-3 py-3">
-                        <span class="text-[13px] font-bold text-slate-400 flex-1">本週還沒有登記任何排班、公差或會議</span>
-                        <button class="text-xs font-black text-white bg-emerald-600 px-3 py-2 rounded-xl" @click="openSchedTab(0)">去登記</button>
-                    </div>
-                    <template v-if="pendingTasks.length">
-                        <div class="pend-h">還沒登記・{{ pendingTasks.length }} 場</div>
-                        <button v-for="p in pendingTasks.slice(0, 6)" :key="'pd' + p.t.id" class="prow w-full text-left" @click="goTask(p)">
-                            <span class="ic" :style="{ background: p.c + '14', color: p.c }"><i :class="p.kind === 'duty' ? 'fa-solid fa-clipboard-check' : 'fa-solid fa-users-rectangle'"></i></span>
-                            <div class="min-w-0 flex-1"><div class="t truncate">{{ p.t.title }}</div><div class="s font-num">{{ p.t.date.split('-')[1] }}/{{ p.t.date.split('-')[2] }}（{{ getWeekday(p.t.date).replace('週', '') }}）{{ p.t.startTime }}・{{ p.kind === 'duty' ? '公差' : '會議' }}</div></div>
-                            <span class="v" :style="{ fontSize: '12px', color: '#fff', background: p.c, padding: '5px 9px', borderRadius: '9px' }">{{ p.kind === 'duty' ? '去報名' : '去填寫' }}</span>
-                        </button>
-                    </template>
+                <section v-if="pendingTasks.length" class="pcard psec">
+                    <div class="hd"><span>還沒登記的公差・會議</span><span class="font-num text-xs font-black text-slate-400">{{ pendingTasks.length }} 場</span></div>
+                    <button v-for="p in pendingTasks.slice(0, 6)" :key="'pd' + p.t.id" class="prow w-full text-left" @click="goTask(p)">
+                        <span class="ic" :style="{ background: p.c + '14', color: p.c }"><i :class="p.kind === 'duty' ? 'fa-solid fa-clipboard-check' : 'fa-solid fa-users-rectangle'"></i></span>
+                        <div class="min-w-0 flex-1"><div class="t truncate">{{ p.t.title }}</div><div class="s font-num">{{ p.t.date.split('-')[1] }}/{{ p.t.date.split('-')[2] }}（{{ getWeekday(p.t.date).replace('週', '') }}）{{ p.t.startTime }}・{{ p.kind === 'duty' ? '公差' : '會議' }}</div></div>
+                        <span class="v" :style="{ fontSize: '12px', color: '#fff', background: p.c, padding: '5px 9px', borderRadius: '9px' }">{{ p.kind === 'duty' ? '去報名' : '去填寫' }}</span>
+                    </button>
                 </section>
            </div>
            <div v-show="schedView !== 'home'" class="pcrumb pg-green-acc"><span class="pemb sm g-green"><i class="fa-solid fa-calendar-days"></i></span><b>排班</b><span class="s">/ {{ (visibleScheduleTabs.find(t => t.id === activeScheduleTab) || {}).name }}</span></div>
@@ -3331,6 +3337,26 @@
         </div>
     </div>
 
+    <div v-if="regSheet" class="rsheet-bg" @click.self="regSheet = null">
+        <div class="rsheet" :style="{ '--c': regSheet === 'duty' ? '#e11d48' : '#7c3aed' }">
+            <div class="grab"></div>
+            <div class="sh">{{ regSheet === 'duty' ? '我登記的公差' : '我登記的會議' }}<span class="font-num text-sm text-slate-400">{{ (regSheet === 'duty' ? myDutyList : myMeetingList).length }}</span><button @click="regSheet = null" aria-label="關閉"><i class="fa-solid fa-xmark"></i></button></div>
+            <div v-for="t in (regSheet === 'duty' ? myDutyList : myMeetingList)" :key="'rs' + t.id" class="it">
+                <div class="db"><b>{{ t.date.split('-')[1] }}/{{ t.date.split('-')[2] }}</b><span>{{ getWeekday(t.date) }}</span></div>
+                <div class="min-w-0 flex-1">
+                    <div class="tt">{{ t.title }}</div>
+                    <div class="mm"><span class="font-num"><i class="fa-solid fa-clock mr-1"></i>{{ t.startTime }} – {{ t.endTime }}</span><span><i class="fa-solid fa-location-dot mr-1"></i>{{ t.location }}</span></div>
+                    <div class="tg">
+                        <template v-if="regSheet === 'duty'"><span class="font-num">已報名 {{ getTaskRegCount(t.id) }}/{{ t.quota }}</span><span v-for="n in getTaskParticipants(t.id)" :key="n">{{ n }}</span></template>
+                        <template v-else><span>{{ myRegOf(t.id).status || '已填寫' }}</span><span v-if="myRegOf(t.id).diet">{{ myRegOf(t.id).diet }}</span><span v-if="myRegOf(t.id).plusAdult">攜伴大人 {{ myRegOf(t.id).plusAdult }}</span><span v-if="myRegOf(t.id).plusChild">攜伴小孩 {{ myRegOf(t.id).plusChild }}</span></template>
+                    </div>
+                    <div v-if="t.note" class="mm" style="margin-top:5px">{{ t.note }}</div>
+                </div>
+                <button class="go" @click="goTask({ t, kind: regSheet }); regSheet = null">查看 ›</button>
+            </div>
+            <div v-if="!(regSheet === 'duty' ? myDutyList : myMeetingList).length" class="none">{{ regSheet === 'duty' ? '還沒有登記任何公差' : '還沒有登記任何會議' }}</div>
+        </div>
+    </div>
 </div>
 <script type="module">
     import * as Store from './js/store.js?v=202611281445';
@@ -7453,8 +7479,12 @@ const goToConfirmStep = (onlyShift = false) => {
             });
             const nextMyShiftDate = computed(() => nextMyShift.value.split(' ')[0] || '');
             const nextMyShiftTime = computed(() => nextMyShift.value.split(' ')[1] || '');
-            const upcomingDutyCount = computed(() => officialTasks.value.filter((t) => (t.date || '') >= getTodayStr()).length);
-            const upcomingMeetingCount = computed(() => meetingTasks.value.filter((t) => (t.date || '') >= getTodayStr()).length);
+            const myUpcoming = (list) => list.filter((t) => !isExpired(t.date) && isUserSignedUp(t.id)).sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
+            const myDutyList = computed(() => myUpcoming(officialTasks.value)), myMeetingList = computed(() => myUpcoming(meetingTasks.value));
+            const upcomingDutyCount = computed(() => myDutyList.value.length);
+            const upcomingMeetingCount = computed(() => myMeetingList.value.length);
+            const regSheet = ref(null);
+            const myRegOf = (id) => registrations.value.find((r) => r.taskId === id && r.userName === userData.value.姓名) || {};
             const dutyShortage = computed(() => {
                 const today = getTodayStr();
                 const list = officialTasks.value.filter((t) => (t.date || '') >= today && Number(t.quota) > 0)
@@ -7507,7 +7537,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 currentWeekStart, weekDates, currentWeekRangeText, changeWeek, hasShift, isPastDate, hourOptions,
                 isShiftModalOpen, isDeleteShiftModalOpen, selectedDay, tempStartTime, tempEndTime, isHourDisabled, isMyShift, userShifts,
                 currentCalendarDate, calendarTitle, calendarCells, changeCalendarMonth, getShiftsForCell, getShiftsCount, getWeekday,
-                officialTasks, meetingTasks, filteredOfficialTasks, filteredMeetingTasks, dutyLanes, meetingLanes, pendingTasks, goTask, tkFlash, isPostModalOpen, postType, newTask, postToLine, isFillingTraining, fillMonthlyTraining,
+                officialTasks, meetingTasks, filteredOfficialTasks, filteredMeetingTasks, dutyLanes, meetingLanes, myDutyList, myMeetingList, regSheet, myRegOf, pendingTasks, goTask, tkFlash, isPostModalOpen, postType, newTask, postToLine, isFillingTraining, fillMonthlyTraining,
                     editingTaskId, sendEditPush, openEditTaskModal, 
                     openPostTaskModal, handlePostTask, handleDeleteTask, getTaskRegCount, getTaskParticipants, isUserSignedUp, toggleRegistration,
                 isMeetingRegModalOpen, regForm, openMeetingRegModal, submitMeetingReg, currentTask, getMeetingSummary, getDetailedRegs, getCategoryClass, isExpired, getFillingCount,
