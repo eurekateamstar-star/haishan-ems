@@ -3275,8 +3275,10 @@
             </div>
             <div class="afs-sub">狀況</div>
             <div class="af-chips sm"><button v-for="w in AF_SX" :key="w" :class="{ on: afQa.sx.includes(w) }" @click="afToggle(afQa.sx, w)">{{ w }}</button></div>
+            <template v-if="afMined.sx.length"><div class="afs-sub">狀況・隊上舊紀錄常用</div><div class="af-chips sm"><button v-for="w in afMined.sx" :key="'ms' + w" :class="{ on: afQa.sx.includes(w) }" @click="afToggle(afQa.sx, w)">{{ w }}</button></div></template>
             <div class="afs-sub">處置</div>
             <div class="af-chips sm"><button v-for="w in AF_TX" :key="w" :class="{ on: afQa.tx.includes(w) }" @click="afToggle(afQa.tx, w)">{{ w }}</button></div>
+            <template v-if="afMined.tx.length"><div class="afs-sub">處置・隊上舊紀錄常用</div><div class="af-chips sm"><button v-for="w in afMined.tx" :key="'mt' + w" :class="{ on: afQa.tx.includes(w) }" @click="afToggle(afQa.tx, w)">{{ w }}</button></div></template>
             <div class="afs-sub">其他補充</div>
             <input type="text" v-model="afQa.note" placeholder="例如：頭部 3 公分撕裂傷" class="af-in">
             <div class="afs-btns"><button class="pri" @click="afQaDone">完成</button></div>
@@ -3312,10 +3314,6 @@
                 <div v-else-if="afSmart.roads.length" class="afs-sug"><button v-for="r in afSmart.roads" :key="r.d + r.r" @click="afPickRoad(r)"><b>{{ r.r }}</b><span v-if="r.d !== afDraft.district" class="text-[11px] text-slate-400 ml-2">{{ r.d }}</span></button></div>
                 <div v-else-if="afSmart.mode === 'roadok'" class="text-[11px] font-bold text-slate-400 mt-1.5">接著打門牌數字，例如 220，會讓你選巷、號或樓</div>
                 <div class="afs-addr"><span>完整地址</span><b>新北市{{ afDraft.district }} {{ afDraft.address || '—' }}</b></div>
-                <template v-if="afTopPlaces.length">
-                    <div class="afs-sub">{{ afDraft.district }}最近填過<em>點一下帶入</em></div>
-                    <div class="af-chips sm"><button v-for="pl in afTopPlaces" :key="pl" :class="{ on: afDraft.address === pl }" @click="afDraft.address = pl; afDraft.errAddress = false"><i class="fa-solid fa-clock-rotate-left mr-1 opacity-40"></i>{{ pl }}</button></div>
-                </template>
             </template>
             <template v-if="afStep === 4">
                 <div class="afs-q">救出人數</div>
@@ -7240,6 +7238,20 @@ const handleTimeInput = (item, field, formType) => {
                 const m = {}; afAllPlaces.value.forEach((p) => { const st = afParseAddr(p).st; if (st) m[st] = (m[st] || 0) + 1; });
                 return Object.keys(m).sort((a, b) => m[b] - m[a]).slice(0, 8);
             });
+            const AF_TX_KEY = /包紮|止血|固定|送醫|後送|轉送|給氧|氧氣|冰敷|CPR|AED|清潔|消毒|安撫|檢傷|評估|測量|協助|處理|拒絕|簽|保暖|復甦|壓迫|搬運|擔架|就醫|返家|交由|警察|家屬/;
+            const afMined = computed(() => {
+                const cnt = {};
+                (allAssistanceRecords.value || []).forEach((r) => (r.cases || []).forEach((c) => {
+                    String(c.description || '').replace(/處置[:：]/g, '、').split(/[，,、；;。．.\n\s]+/).forEach((w) => {
+                        w = w.trim().replace(/^(并|並|且|後|有|予|給予)/, '');
+                        if (w.length < 2 || w.length > 8) return;
+                        if (/^\d{1,3}(歲|y)?[男女]?$/.test(w) || /^[男女]性?$/.test(w) || /^\d/.test(w)) return;
+                        cnt[w] = (cnt[w] || 0) + 1;
+                    });
+                }));
+                const words = Object.keys(cnt).filter((w) => cnt[w] >= 2 && !AF_SX.includes(w) && !AF_TX.includes(w)).sort((a, b) => cnt[b] - cnt[a]);
+                return { sx: words.filter((w) => !AF_TX_KEY.test(w)).slice(0, 12), tx: words.filter((w) => AF_TX_KEY.test(w)).slice(0, 12) };
+            });
             const afQaOpen = ref(false);
             const afQa = ref({ age: '', sex: '', sx: [], tx: [], note: '' });
             const afQaText = computed(() => {
@@ -7256,11 +7268,11 @@ const handleTimeInput = (item, field, formType) => {
                 const notes = [];
                 t.split('，').filter(Boolean).forEach((part, i) => {
                     const m = /^(\d{1,3})歲([男女]?)$/.exec(part) || (i === 0 && /^()([男女])$/.exec(part));
-                    if (i === 0 && m) { q.age = m[1]; q.sex = m[2]; } else if (AF_SX.includes(part)) q.sx.push(part); else notes.push(part);
+                    if (i === 0 && m) { q.age = m[1]; q.sex = m[2]; } else if (AF_SX.includes(part) || afMined.value.sx.includes(part)) q.sx.push(part); else notes.push(part);
                 });
                 q.note = notes.join('，');
-                const extra = q.tx.filter((x) => !AF_TX.includes(x));
-                if (extra.length) { q.tx = q.tx.filter((x) => AF_TX.includes(x)); q.note = [q.note, ...extra].filter(Boolean).join('，'); }
+                const extra = q.tx.filter((x) => !AF_TX.includes(x) && !afMined.value.tx.includes(x));
+                if (extra.length) { q.tx = q.tx.filter((x) => AF_TX.includes(x) || afMined.value.tx.includes(x)); q.note = [q.note, ...extra].filter(Boolean).join('，'); }
                 return q;
             };
             const afQaDone = () => { if (afDraft.value) afDraft.value.description = afQaText.value; afQaOpen.value = false; };
@@ -7748,7 +7760,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 openAdminDeleteActivity, adminDeleteableActivities, confirmAdminDeleteAct, executeAdminDeleteAct,isMemberHistoryModalOpen, selectedDutyMember, openMemberDutyHistory, selectedMemberDutyHistory,
                 
                 // 協勤專屬
-                assistanceStep, assistanceForm, afTried, afConfirm, afHours, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
+                assistanceStep, assistanceForm, afTried, afConfirm, afHours, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
                 isAssistTimeModalOpen, assistTempStart, assistTempEnd, openAssistTimeModal, selectAssistHour, resetAssistTimeSelection, confirmAssistTime, isAssistHourDisabled,
                 activeAssistTab, visibleAssistTabs, assistSlider, assistTabsScrollRef, scrollToAssistTab, onAssistSliderScroll, dynamicMemberHours,displayEmtExpiry,exportPaymentRequestToExcel,
                 myAssistanceRecords, allAssistanceRecords, isAssistEditModalOpen, editingAssistRecord, openAssistEditModal, submitAssistEdit, deleteAssistRecord, handleTimeInput,
