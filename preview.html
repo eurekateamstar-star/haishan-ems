@@ -340,6 +340,22 @@
         .tl-node .bar span{position:absolute;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#065f46,#10b981)}
         .tl-node.me .rail i{background:#10b981}
         .tl-node.me .nm{color:#047857}
+
+        .gantt{display:flex;flex-direction:column;gap:2px;padding-top:4px}
+        .gaxis{position:relative;height:16px;margin-left:62px;margin-right:4px}
+        .gaxis span{position:absolute;top:0;transform:translateX(-50%);font-size:10px;font-weight:700;color:#8a94a6;font-family:Inter,sans-serif}
+        .grow{display:flex;align-items:center;gap:10px;height:38px}
+        .gname{width:52px;font-size:13px;font-weight:800;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .grow.me .gname{color:#047857}
+        .gtrack{position:relative;flex:1;height:100%;margin-right:4px;border-radius:10px;background:#f8fafc}
+        .gline{position:absolute;top:4px;bottom:4px;border-left:1px dashed #e2e8f0}
+        .gbar{position:absolute;top:9px;height:20px;border-radius:10px;background:linear-gradient(90deg,#065f46,#10b981);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 10px -6px #059669}
+        .glbl{position:absolute;top:11px;font-size:11px;font-weight:800;font-family:Inter,sans-serif;color:#475569;white-space:nowrap}
+        .wk-day.sel{background:linear-gradient(160deg,#065f46,#10b981)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 8px 14px -8px #059669}
+        .ui-btn:not(.ghost){background:linear-gradient(120deg,#065f46,#10b981)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 24px -14px #059669}
+        .ggaps{display:flex;flex-wrap:wrap;gap:6px;padding-top:8px}
+        .ggaps span{font-size:12px;font-weight:800;color:#e11d48;background:#fff1f2;padding:6px 10px;border-radius:10px}
+        .ggaps.ok span{color:#047857;background:#ecfdf5}
 </style>
 </head>
 <body>
@@ -756,16 +772,18 @@
                             </div>
                             <div v-if="schedSelDay" class="ui-card p-4 mb-3 space-y-3">
                                 <div class="flex justify-between items-center"><span class="text-[15px] font-black text-slate-800">{{ schedSelDay.fullDate.slice(5).replace('-', '/') }}（{{ String(schedSelDay.weekday).replace('週', '') }}）</span><span class="text-xs font-bold text-slate-500">{{ (userShifts[schedSelDay.fullDate] || []).length }} 人登記</span></div>
-                                <div v-if="hasShift(schedSelDay.fullDate)" class="tl">
-                                    <div v-for="s in [...(userShifts[schedSelDay.fullDate] || [])].sort((a, b) => Number(a.start) - Number(b.start))" :key="s.name" class="tl-node" :class="{ me: s.name === userData.姓名 }">
-                                        <div class="t">{{ String(s.start).padStart(2, '0') }}:00</div>
-                                        <div class="rail"><i></i><b></b></div>
-                                        <div class="body">
-                                            <div class="nm">{{ s.name }}<span v-if="s.name === userData.姓名" class="ml-1.5 text-[10px] font-black text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded align-middle">我</span></div>
-                                            <div class="tm">{{ String(s.start).padStart(2, '0') }}:00 – {{ String(s.end).padStart(2, '0') }}:00・{{ ((Number(s.end) - Number(s.start) + 24) % 24) || 24 }} 小時</div>
-                                            <div class="bar"><span :style="{ left: (Number(s.start) / 24 * 100) + '%', width: ((((Number(s.end) - Number(s.start) + 24) % 24) || 24) / 24 * 100) + '%' }"></span></div>
+                                <div v-if="hasShift(schedSelDay.fullDate)" class="gantt">
+                                    <div class="gaxis"><span v-for="h in [0, 6, 12, 18, 24]" :key="'t' + h" :style="{ left: (h / 24 * 100) + '%' }">{{ String(h).padStart(2, '0') }}</span></div>
+                                    <div v-for="s in [...(userShifts[schedSelDay.fullDate] || [])].sort((a, b) => Number(a.start) - Number(b.start))" :key="s.name" class="grow" :class="{ me: s.name === userData.姓名 }">
+                                        <span class="gname">{{ s.name }}</span>
+                                        <div class="gtrack">
+                                            <i v-for="h in [6, 12, 18]" :key="'g' + h" class="gline" :style="{ left: (h / 24 * 100) + '%' }"></i>
+                                            <span class="gbar" :style="ganttBar(s)"></span>
+                                            <span class="glbl" :style="ganttLabel(s)">{{ String(s.start).padStart(2, '0') }}–{{ String(s.end).padStart(2, '0') }}</span>
                                         </div>
                                     </div>
+                                    <div v-if="schedDayGaps.length" class="ggaps"><span v-for="g in schedDayGaps" :key="g">{{ g }} 沒人</span></div>
+                                    <div v-else class="ggaps ok"><span>24 小時都有人</span></div>
                                 </div>
                                 <p v-else class="text-[13px] font-bold text-slate-400">{{ isPastDate(schedSelDay.fullDate) ? '這天已過，沒有排班紀錄' : '這天還沒有人登記' }}</p>
                                 <button v-if="!isPastDate(schedSelDay.fullDate) && !isMyShift(schedSelDay.fullDate)" class="ui-btn" @click="openShiftModal(schedSelDay)">登記這天的排班</button>
@@ -7373,7 +7391,23 @@ const goToConfirmStep = (onlyShift = false) => {
                 return (Math.round(d / 6) / 10).toFixed(1) + ' hr';
             };
             const emtDaysLeft = computed(() => calculateDays(String(displayEmtExpiry.value || '').replace(/\//g, '-')));
+
+            const ganttRange = (sh) => { const a = Number(sh.start) || 0; let b = Number(sh.end) || 0; if (b <= a) b = 24; return [a, Math.min(b, 24)]; };
+            const ganttBar = (sh) => { const [a, b] = ganttRange(sh); return { left: (a / 24 * 100) + '%', width: ((b - a) / 24 * 100) + '%' }; };
+            const ganttLabel = (sh) => { const [a, b] = ganttRange(sh); return b > 18 ? { right: ((24 - a) / 24 * 100 + 2) + '%' } : { left: 'calc(' + (b / 24 * 100) + '% + 6px)' }; };
+            const schedDayGaps = computed(() => {
+                const d = schedSelDay.value; if (!d) return [];
+                const cover = new Array(24).fill(false);
+                for (const sh of (userShifts.value[d.fullDate] || [])) { const [a, b] = ganttRange(sh); for (let h = a; h < b; h++) cover[h] = true; }
+                const out = []; let st = null;
+                for (let h = 0; h <= 24; h++) {
+                    if (h < 24 && !cover[h]) { if (st === null) st = h; }
+                    else if (st !== null) { out.push(String(st).padStart(2, '0') + '–' + String(h).padStart(2, '0')); st = null; }
+                }
+                return out;
+            });
             return {
+                ganttBar, ganttLabel, schedDayGaps,
                 schedView, assistView, rescueView, tabTint, openSchedTab, openAssistTab, openRescueTab, myWeekShiftCount, nextMyShift, nextMyShiftDate, nextMyShiftTime, upcomingDutyCount, upcomingMeetingCount, dutyShortage, recentMyRecords, hours_between_ui, emtDaysLeft,
                 schedSel, schedSelDay,
                 UI_ICONS, dashView, walletFront, hideNums, walletOrder, myHours, walletStyle, walletTappable, walletTap, walletRight, dashFuncs, goDashHome, openDashFunc, certReminder, topCases,
