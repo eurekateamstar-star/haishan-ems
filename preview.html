@@ -356,6 +356,39 @@
         .ggaps{display:flex;flex-wrap:wrap;gap:6px;padding-top:8px}
         .ggaps span{font-size:12px;font-weight:800;color:#e11d48;background:#fff1f2;padding:6px 10px;border-radius:10px}
         .ggaps.ok span{color:#047857;background:#ecfdf5}
+
+        /* 登記排班：細線刻度 */
+        .wk-day.sel{background:#0f172a!important;color:#fff!important;box-shadow:none!important}
+        .wk-day .pip.has{background:#059669}.wk-day.sel .pip.has{background:#fff}
+        .ui-card{box-shadow:none!important;border:1px solid #e5e7eb!important;border-radius:16px!important}
+        .ui-btn:not(.ghost){background:#059669!important;box-shadow:none!important;border-radius:14px!important}
+        .ui-btn.ghost{border-radius:14px!important}
+        .gaxis{margin-left:58px;margin-right:2px}
+        .gname{width:48px!important}
+        .grow{height:34px!important}
+        .gtrack{background:transparent!important;border-radius:0!important;margin-right:2px!important}
+        .gline{top:0!important;bottom:0!important;border-left:1px solid #eef0f3!important}
+        .gline.major{border-left-color:#d7dce3!important}
+        .gbar{top:13px!important;height:8px!important;border-radius:4px!important;background:#059669!important;box-shadow:none!important}
+        .glbl{top:-1px!important;font-size:10px!important;color:#059669!important;font-weight:800}
+        .gcover{display:flex;align-items:center;gap:10px;height:18px;margin-top:2px}
+        .gcover b{width:48px;font-size:11px;font-weight:800;color:#64748b}
+        .gcover .trk{flex:1;position:relative;height:6px;border-radius:3px;margin-right:2px;background:repeating-linear-gradient(135deg,#fecdd3 0 3px,#fff1f2 3px 6px)}
+        .gcover .trk span{position:absolute;top:0;bottom:0;background:#059669;border-radius:3px}
+        .ggaps span{background:#fff!important;border:1px solid #fecdd3;padding:4px 9px!important;border-radius:8px!important;font-weight:700!important}
+        .ggaps.ok span{border-color:#a7f3d0}
+        /* 排班總覽：細線月曆 */
+        .calendar-grid{gap:0!important;background:#fff!important;border:1px solid #e5e7eb!important;border-radius:16px!important}
+        .calendar-day-header{background:#fff!important;font-size:11px!important;color:#64748b!important;padding:9px 0 7px!important}
+        .calendar-day-header:nth-child(6), .calendar-day-header:nth-child(7){color:#e11d48!important}
+        .calendar-cell{min-height:68px!important;padding:4px 4px 3px!important;border-top:1px solid #e5e7eb}
+        .calendar-cell:nth-child(7n+6), .calendar-cell:nth-child(7n){background:#f8fafc}
+        .calendar-cell.other-month{background:#fff!important;color:#cbd5e1}
+        .calendar-cell.other-month .cname{color:#cbd5e1}
+        .day-num{display:inline-flex;width:20px;height:20px;align-items:center;justify-content:center;font-size:12px!important;border-radius:10px}
+        .calendar-cell.today .day-num{background:#059669!important;width:20px!important;height:20px!important}
+        .cname{display:block;font-size:10px;font-weight:700;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+        .cmore{font-size:9px;color:#64748b;font-weight:700}
 </style>
 </head>
 <body>
@@ -777,11 +810,12 @@
                                     <div v-for="s in [...(userShifts[schedSelDay.fullDate] || [])].sort((a, b) => Number(a.start) - Number(b.start))" :key="s.name" class="grow" :class="{ me: s.name === userData.姓名 }">
                                         <span class="gname">{{ s.name }}</span>
                                         <div class="gtrack">
-                                            <i v-for="h in [6, 12, 18]" :key="'g' + h" class="gline" :style="{ left: (h / 24 * 100) + '%' }"></i>
+                                            <i v-for="h in [0,2,4,6,8,10,12,14,16,18,20,22,24]" :key="'g' + h" class="gline" :class="{ major: h % 6 === 0 }" :style="{ left: (h / 24 * 100) + '%' }"></i>
                                             <span class="gbar" :style="ganttBar(s)"></span>
                                             <span class="glbl" :style="ganttLabel(s)">{{ String(s.start).padStart(2, '0') }}–{{ String(s.end).padStart(2, '0') }}</span>
                                         </div>
                                     </div>
+                                    <div class="gcover"><b>涵蓋</b><div class="trk"><span v-for="c in schedDayCover" :key="'c' + c[0]" :style="{ left: (c[0] / 24 * 100) + '%', width: ((c[1] - c[0]) / 24 * 100) + '%' }"></span></div></div>
                                     <div v-if="schedDayGaps.length" class="ggaps"><span v-for="g in schedDayGaps" :key="g">{{ g }} 沒人</span></div>
                                     <div v-else class="ggaps ok"><span>24 小時都有人</span></div>
                                 </div>
@@ -812,7 +846,7 @@
                                 <div v-for="w in ['一','二','三','四','五','六','日']" :key="w" class="calendar-day-header">{{w}}</div>
                                 <div v-for="(cell, idx) in calendarCells" :key="idx" class="calendar-cell" :class="{ 'other-month': !cell.currentMonth, 'today': cell.isToday }">
                                     <span class="day-num">{{ cell.day }}</span>
-                                    <div class="mt-1 flex flex-col gap-0.5"><div v-for="s in getShiftsForCell(cell.fullDate).slice(0,3)" :key="s.name" class="text-[9px] px-1 bg-blue-50 text-blue-800 rounded truncate">{{ s.name }}</div><div v-if="getShiftsCount(cell.fullDate) > 3" class="text-[7px] text-slate-400 font-bold text-center">...</div></div>
+                                    <div class="mt-1 flex flex-col gap-0.5"><span v-for="s in getShiftsForCell(cell.fullDate).slice(0,2)" :key="s.name" class="cname">{{ s.name }}</span><span v-if="getShiftsCount(cell.fullDate) > 2" class="cmore">+{{ getShiftsCount(cell.fullDate) - 2 }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -7394,7 +7428,15 @@ const goToConfirmStep = (onlyShift = false) => {
 
             const ganttRange = (sh) => { const a = Number(sh.start) || 0; let b = Number(sh.end) || 0; if (b <= a) b = 24; return [a, Math.min(b, 24)]; };
             const ganttBar = (sh) => { const [a, b] = ganttRange(sh); return { left: (a / 24 * 100) + '%', width: ((b - a) / 24 * 100) + '%' }; };
-            const ganttLabel = (sh) => { const [a, b] = ganttRange(sh); return b > 18 ? { right: ((24 - a) / 24 * 100 + 2) + '%' } : { left: 'calc(' + (b / 24 * 100) + '% + 6px)' }; };
+            const ganttLabel = (sh) => { const [a] = ganttRange(sh); return a > 20 ? { right: '0' } : { left: (a / 24 * 100) + '%' }; };
+            const schedDayCover = computed(() => {
+                const d = schedSelDay.value; if (!d) return [];
+                const cover = new Array(24).fill(false);
+                for (const sh of (userShifts.value[d.fullDate] || [])) { const [a, b] = ganttRange(sh); for (let h = a; h < b; h++) cover[h] = true; }
+                const out = []; let st = null;
+                for (let h = 0; h <= 24; h++) { if (h < 24 && cover[h]) { if (st === null) st = h; } else if (st !== null) { out.push([st, h]); st = null; } }
+                return out;
+            });
             const schedDayGaps = computed(() => {
                 const d = schedSelDay.value; if (!d) return [];
                 const cover = new Array(24).fill(false);
@@ -7407,7 +7449,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 return out;
             });
             return {
-                ganttBar, ganttLabel, schedDayGaps,
+                ganttBar, ganttLabel, schedDayGaps, schedDayCover,
                 schedView, assistView, rescueView, tabTint, openSchedTab, openAssistTab, openRescueTab, myWeekShiftCount, nextMyShift, nextMyShiftDate, nextMyShiftTime, upcomingDutyCount, upcomingMeetingCount, dutyShortage, recentMyRecords, hours_between_ui, emtDaysLeft,
                 schedSel, schedSelDay,
                 UI_ICONS, dashView, walletFront, hideNums, walletOrder, myHours, walletStyle, walletTappable, walletTap, walletRight, dashFuncs, goDashHome, openDashFunc, certReminder, topCases,
