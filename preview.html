@@ -7236,18 +7236,23 @@ const handleTimeInput = (item, field, formType) => {
                 const m = {}; afAllPlaces.value.forEach((p) => { const st = afParseAddr(p).st; if (st) m[st] = (m[st] || 0) + 1; });
                 return Object.keys(m).sort((a, b) => m[b] - m[a]).slice(0, 8);
             });
-            const AF_TX_KEY = /包紮|止血|固定|送醫|後送|轉送|拒送|給氧|氧氣|冰敷|CPR|AED|V\/S|keep|清潔|清洗|消毒|安撫|支持|檢傷|評估|測量|監測|監生|協助|處理|拒絕|簽|保暖|復甦|壓迫|搬運|擔架|就醫|返家|返隊|交由|警察|家屬|衛教|觀察/i;
+            const AF_TX_KEY = /keep v\/s|包紮|止血|固定|送醫|後送|轉送|拒送|給氧|氧氣|冰敷|CPR|AED|V\/S|keep|清潔|清洗|消毒|安撫|支持|檢傷|評估|測量|監測|監生|協助|處理|拒絕|簽|保暖|復甦|壓迫|搬運|擔架|就醫|返家|返隊|交由|警察|家屬|衛教|觀察/i;
             // 常見錯字／同義寫法 → 統一寫法
             const AF_FIX = [[/心裡/g, '心理'], [/包[扎紥札]/g, '包紮'], [/撕[列烈]傷/g, '撕裂傷'], [/挫擦傷/g, '擦挫傷'], [/抽[蓄畜]/g, '抽搐'], [/骨拆/g, '骨折'],
                 [/意識清[醒處]/g, '意識清楚'], [/呼吸困[滩灘]/g, '呼吸困難'], [/頭[昏]/g, '頭暈'], [/送[医]/g, '送醫'], [/止[血]{2,}/g, '止血'], [/傷口[消]毒/g, '傷口消毒'],
                 [/^清潔傷口$/, '傷口清潔'], [/^消毒傷口$/, '傷口消毒'], [/^止血包紮$/, '包紮止血'], [/^生命徵象測量$/, '測量生命徵象'], [/^量測生命徵象$/, '測量生命徵象'],
                 [/^vs$/i, 'V/S'], [/^v\.s\.?$/i, 'V/S'], [/[ 　]/g, ''], [/[Ａ-Ｚａ-ｚ０-９／]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)]];
-            const afFix = (w) => AF_FIX.reduce((t, [re, to]) => t.replace(re, to), w);
-            const AF_JUNK = /^(y\/o|yo|y|o|na|n\/a|ok)$/i;
+            const afFix = (w) => AF_FIX.reduce((t, [re, to]) => t.replace(re, to), w).replace(/^KEEPVS$/, 'keep v/s');
+            // keep / v/s 一律合併成「keep v/s」；黏在一起的常用詞拆開（例如「監生心理支持」）
+            const AF_LEX = ['keep v/s', '監生', '心理支持', '清洗傷口', '傷口清潔', '傷口消毒', '包紮止血', '包紮', '衛教返家'];
+            const afPre = (t) => String(t || '')
+                .replace(/(keep\s*)?v\s*[\/／]?\s*s(監視|檢視|監測|穩定|正常)?|keep/gi, '、KEEPVS、')
+                .replace(new RegExp('(' + AF_LEX.slice(1).join('|') + ')(?=[^、，,；;。\\s])', 'g'), '$1、');
+            const AF_JUNK = /^(y\/o|yo|y|o|na|n\/a|ok|male|female|男性|女性|m|f)$/i;
             const afMined = computed(() => {
                 const cnt = {}, form = {};
                 (allAssistanceRecords.value || []).forEach((r) => (r.cases || []).forEach((c) => {
-                    String(c.description || '').replace(/處置[:：]/g, '、').split(/[，,、；;。．.\n\s]+/).forEach((w) => {
+                    afPre(c.description).replace(/處置[:：]/g, '、').split(/[，,、；;。．.\n\s]+/).forEach((w) => {
                         w = afFix(w.trim()).replace(/^(并|並|且|後|有|予|給予)/, '');
                         if (w.length < 2 || w.length > 8 || AF_JUNK.test(w)) return;
                         if (/^\d{1,3}(歲|y\/?o?)?[男女]?$/i.test(w) || /^[男女]性?$/.test(w) || /^\d/.test(w)) return;
