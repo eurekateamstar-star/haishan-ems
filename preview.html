@@ -604,6 +604,19 @@
         .org-mem{display:flex;flex-direction:column;gap:3px;background:#fff;border:1px solid #e7eaf0;border-radius:12px;padding:5px}
         .org-mem button{all:unset;cursor:pointer;text-align:center;font-size:12px;font-weight:800;color:#334155;padding:4px 0;border-radius:7px}
         .org-mem button:nth-child(odd){background:#f8fafc}
+        .org .org-n{border:0 !important;padding:7px 14px;border-radius:14px;min-width:84px}
+        .org .org-n.top{background:#0f172a !important}.org .org-n.top small{color:#94a3b8}.org .org-n.top b{color:#fff}
+        .org .org-n.mid{background:#334155 !important}.org .org-n.mid small{color:#cbd5e1}.org .org-n.mid b{color:#fff}
+        .org .org-staff{border:0 !important;background:none !important;padding:0 !important;gap:6px !important}
+        .org .org-staff .org-n.stf{display:flex;flex-direction:column;align-items:center;background:#e2e8f0;padding:6px 14px;border-radius:14px}.org .org-n.stf small{color:#64748b}.org .org-n.stf b{color:#0f172a;font-size:14px}
+        .org .org-sq{background:color-mix(in srgb,var(--sc) 7%,#fff);border-radius:14px;padding:5px;gap:4px}
+        .org .org-sq:before{top:-14px;height:14px}
+        .org .org-cols{margin-top:12px}
+        .org .org-sqh{background:var(--sc) !important;border-radius:10px}
+        .org .org-n.ld{background:var(--sc) !important;padding:6px 2px}.org .org-n.ld small{color:rgba(255,255,255,.8) !important}.org .org-n.ld b{color:#fff}
+        .org .org-n.ld.dep{background:color-mix(in srgb,var(--sc) 78%,#fff) !important}
+        .org .org-mem{background:none !important;border:0 !important;padding:0 !important;gap:3px}
+        .org .org-mem button{background:#fff !important;border-radius:8px;padding:6px 0}
         .ov-none{font-size:12px;font-weight:700;color:#cbd5e1;margin-top:6px}
         .ov-row{display:flex;align-items:center;gap:10px;cursor:pointer}
         .ov-nm{width:70px;flex-shrink:0}.ov-nm b{display:block;font-size:14px;font-weight:900;color:#0f172a}.ov-nm small{font-size:10px;font-weight:800;color:#94a3b8}
@@ -1331,13 +1344,13 @@
                     <div class="org-lv">
                         <button v-for="m in orgTree.deputy" :key="m.姓名" class="org-n mid" @click="memOpen(m)"><small>副分隊長</small><b>{{ m.姓名 }}</b></button>
                     </div>
-                    <div v-if="orgTree.staff.length" class="org-staff"><span class="lb">幹部</span><button v-for="m in orgTree.staff" :key="m.姓名" @click="memOpen(m)"><b>{{ m.姓名 }}</b><small>{{ m.duty_title }}</small></button></div>
+                    <div v-if="orgTree.staff.length" class="org-staff"><button v-for="m in orgTree.staff" :key="m.姓名" class="org-n stf" @click="memOpen(m)"><small>{{ m.duty_title }}</small><b>{{ m.姓名 }}</b></button></div>
                     <div class="org-v"></div>
                     <div class="org-bus" :style="{ '--n': orgTree.squads.length }"></div>
                     <div class="org-cols" :style="{ gridTemplateColumns: 'repeat(' + orgTree.squads.length + ', minmax(0,1fr))' }">
-                        <section v-for="sq in orgTree.squads" :key="sq.name" class="org-sq">
+                        <section v-for="(sq, si) in orgTree.squads" :key="sq.name" class="org-sq" :style="{ '--sc': ['#0f766e', '#2563eb', '#c2410c', '#7c3aed', '#be123c'][si % 5] }">
                             <div class="org-sqh">{{ sq.name }}<em>{{ sq.all }}人</em></div>
-                            <button v-for="m in sq.lead" :key="m.姓名" class="org-n ld" @click="memOpen(m)"><small>{{ m.duty_title }}</small><b>{{ m.姓名 }}</b></button>
+                            <button v-for="m in sq.lead" :key="m.姓名" class="org-n ld" :class="{ dep: m.duty_title !== '小隊長' }" @click="memOpen(m)"><small>{{ m.duty_title }}</small><b>{{ m.姓名 }}</b></button>
                             <div v-if="sq.members.length" class="org-mem"><button v-for="m in sq.members" :key="m.姓名" @click="memOpen(m)">{{ m.姓名 }}</button></div>
                         </section>
                     </div>
