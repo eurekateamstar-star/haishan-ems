@@ -287,7 +287,16 @@ async function writeAssistance(id, data) {
     case_start: c.caseStart ?? c.startTime ?? '', case_end: c.caseEnd ?? c.endTime ?? '', district: c.district || '',
     address: c.address || '', case_type: c.caseType ?? c.type ?? '', description: c.description || '',
     rescued_count: Number(c.rescuedCount) || 0 }));
-  return check(await sb.rpc('save_assistance', { p_record: record, p_cases: cases }));
+  const newId = check(await sb.rpc('save_assistance', { p_record: record, p_cases: cases }));
+  // 沒有案件時的類別（CPR宣導、公差、訓練）與備註，存在 extra；沒帶這兩個欄位就不動
+  if ('activity' in data || 'note' in data) {
+    const rid = newId || id;
+    const cur = check(await sb.from('assistance_records').select('extra').eq('id', rid).maybeSingle());
+    const extra = { ...(cur?.extra || {}) };
+    for (const k of ['activity', 'note']) if (k in data) { if (data[k]) extra[k] = data[k]; else delete extra[k]; }
+    check(await sb.from('assistance_records').update({ extra }).eq('id', rid));
+  }
+  return newId;
 }
 
 // 修改時保留原本 extra 裡的其他欄位

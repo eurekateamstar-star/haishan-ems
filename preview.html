@@ -422,6 +422,11 @@
         .af-r2 .rc{width:58px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-left:1px dashed #e2e8f0;position:relative;padding:8px 0}
         .af-r2 .rc b{font-family:Inter,sans-serif;font-size:26px;font-weight:800;line-height:1;color:#0f172a}.af-r2 .rc span{font-size:10px;font-weight:800;color:#64748b;margin-top:2px}
         .af-r2 .rc .del{all:unset;cursor:pointer;margin-top:6px;width:28px;height:24px;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:12px}
+        .af-acts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+        .af-acts button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 2px;border-radius:13px;border:1px solid #e7eaf0;background:#fff;text-align:center}
+        .af-acts button i{font-size:17px;color:var(--a)}.af-acts button span{font-size:11px;font-weight:900;color:#334155;line-height:1.2}
+        .af-acts button.on{background:var(--a);border-color:var(--a)}.af-acts button.on i,.af-acts button.on span{color:#fff}
+        .rt-h .sb.act{color:#fff;background:var(--a,#f59e0b)}
         .af-sum .row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:6px 0}
         .af-sum .row span{color:#64748b;font-weight:700}.af-sum .row b{font-weight:900;color:#0f172a;text-align:right}
         .af-sum .cs{border-top:1px solid #f1f3f6;padding:10px 0}
@@ -1378,8 +1383,13 @@
                                 <div class="rc"><b>{{ c.rescuedCount }}</b><span>救出</span><button class="del" @click.stop="assistanceForm.cases.splice(idx, 1)" aria-label="刪除這一件"><i class="fa-solid fa-trash-can"></i></button></div>
                             </div>
 
+                            <section v-if="!assistanceForm.cases.length" class="af-card af-act">
+                                <div class="af-lab" style="margin-bottom:8px">這次沒有救護案件，是</div>
+                                <div class="af-acts"><button v-for="x in AF_ACTS" :key="x.k" :class="{ on: afAct === x.k }" :style="{ '--a': x.c }" @click="assistanceForm.activity = x.k === '待命' ? '' : x.k"><i :class="'fa-solid ' + x.i"></i><span>{{ x.k }}</span></button></div>
+                                <input type="text" v-model="assistanceForm.note" placeholder="備註（選填），例如：板橋國小 CPR 宣導" class="af-in" style="margin-top:10px">
+                            </section>
                             <button class="af-add" @click="afOpen(-1)"><i class="fa-solid fa-plus"></i>{{ assistanceForm.cases.length ? '再加一件' : '加一件救護案件' }}</button>
-                            <button class="af-submit" @click="afSubmit">{{ assistanceForm.cases.length ? '送出紀錄' : '送出（只登記協勤時間）' }}</button>
+                            <button class="af-submit" @click="afSubmit">{{ assistanceForm.cases.length ? '送出紀錄' : (afAct === '待命' ? '送出（待命，只登記時間）' : '送出（' + afAct + '）') }}</button>
                         </div>
                     </div>
 
@@ -1432,7 +1442,7 @@
                                         <div class="rt-h">
                                             <span class="tm">{{ record.shiftStart }}–{{ record.shiftEnd }}</span>
                                             <span v-if="rtCases(record).length" class="n">{{ rtCases(record).length }} 件</span>
-                                            <span v-else class="sb">{{ record.recordType || '待命協勤' }}</span>
+                                            <span v-else class="sb" :class="{ act: record.activity }" :style="record.activity ? { '--a': rtActColor(record.activity) } : {}">{{ record.activity || '待命協勤' }}</span>
                                             <span class="ops"><button @click="openAssistEditModal(record)" aria-label="修改"><i class="fa-solid fa-pen-to-square"></i></button><button @click="deleteAssistRecord(record.id)" aria-label="刪除"><i class="fa-solid fa-trash-can"></i></button></span>
                                         </div>
                                         <div v-for="(c, ci) in rtCases(record)" :key="ci" class="rt-c">
@@ -1440,7 +1450,7 @@
                                             <div class="l2">救出 {{ c.rescuedCount || 0 }} 人・{{ c.district }} {{ c.address }}</div>
                                             <div v-if="c.description" class="l3">{{ c.description }}</div>
                                         </div>
-                                        <div v-if="!rtCases(record).length" class="rt-none">只登記協勤時段，沒有案件</div>
+                                        <div v-if="!rtCases(record).length" class="rt-none">{{ record.note || (record.activity ? record.activity + '，沒有救護案件' : '只登記協勤時段，沒有案件') }}</div>
                                     </div>
                                 </div>
                             </section>
@@ -3328,7 +3338,7 @@
             <div class="row"><span>姓名</span><b>{{ userData.姓名 }}</b></div>
             <div class="row"><span>協勤日期</span><b class="font-num">{{ assistanceForm.date }}</b></div>
             <div class="row"><span>協勤時段</span><b class="font-num" style="color:#1d4ed8">{{ assistanceForm.startTime }} – {{ assistanceForm.endTime }}</b></div>
-            <div v-if="!assistanceForm.cases.length" class="cs text-[13px] font-bold text-amber-600">這次只登記協勤時間，沒有救護案件。</div>
+            <div v-if="!assistanceForm.cases.length" class="row"><span>類別</span><b>{{ afAct === '待命' ? '待命（沒有案件）' : afAct }}</b></div><div v-if="!assistanceForm.cases.length && assistanceForm.note" class="row"><span>備註</span><b>{{ assistanceForm.note }}</b></div><div v-if="!assistanceForm.cases.length" class="cs text-[12px] font-bold text-slate-400">時數照協勤時段記，跟沒有案件一樣。</div>
             <div v-for="(c, i) in assistanceForm.cases" :key="'afs' + i" class="cs">
                 <div class="flex items-baseline gap-2"><b class="text-[14px] font-black">第 {{ i + 1 }} 件・{{ c.type }}</b><span class="font-num text-xs text-slate-400 ml-auto">{{ c.startTime }} – {{ c.endTime }}</span></div>
                 <div class="text-xs text-slate-500 font-bold mt-1">{{ c.district }} {{ c.address }}・救出 {{ c.rescuedCount }} 人</div>
@@ -3350,8 +3360,8 @@ window.__openBook = function (a, e) {
 };
 </script>
 <script type="module">
-    import * as Store from './js/store.js?v=202611281445';
-    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js?v=202611281445';
+    import * as Store from './js/store.js?v=202611281800';
+    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js?v=202611281800';
     import { startAuth, logout as lineLogout } from './js/auth.js?v=202611281445';
 
     // 舊程式還會呼叫到的 Firebase 名稱，留空殼避免出錯
@@ -7149,6 +7159,9 @@ const handleTimeInput = (item, field, formType) => {
                 });
                 return out;
             });
+            const AF_ACTS = [{ k: '待命', i: 'fa-hourglass-half', c: '#d97706' }, { k: 'CPR宣導', i: 'fa-heart-pulse', c: '#e11d48' }, { k: '公差', i: 'fa-clipboard-check', c: '#0891b2' }, { k: '訓練', i: 'fa-dumbbell', c: '#7c3aed' }];
+            const afAct = computed(() => assistanceForm.value.activity || '待命');
+            const rtActColor = (a) => (AF_ACTS.find((x) => x.k === a) || {}).c || '#f59e0b';
             const afDraft = ref(null), afEditIdx = ref(-1), afStep = ref(1);
             const AF_SX = ['意識清楚', '意識不清', '頭暈', '胸痛', '呼吸困難', '腹痛', '發燒', '抽搐', '酒醉', '擦挫傷', '撕裂傷', '骨折疑慮', '出血', '燒燙傷', '無外傷'];
             const AF_TX = ['包紮止血', '傷口清潔', '固定', '頸圈固定', '冰敷', '給氧', '測量生命徵象', '血糖測量', 'CPR', 'AED', '安撫情緒', '協助送醫', '拒絕送醫', '現場處理完畢'];
@@ -7427,7 +7440,7 @@ const goToConfirmStep = (onlyShift = false) => {
                     };
 
                     if (assistanceForm.value.cases.length === 0) {
-                        await addDoc(collection(db, "assistance_records"), { ...baseData, recordType: '待命協勤' });
+                        await addDoc(collection(db, "assistance_records"), { ...baseData, recordType: '待命協勤', activity: assistanceForm.value.activity || '', note: (assistanceForm.value.note || '').trim() });
                     } else {
                         baseData.recordType = '急救護-救護勤務';
                         baseData.cases = assistanceForm.value.cases.map(c => ({
@@ -7784,7 +7797,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 openAdminDeleteActivity, adminDeleteableActivities, confirmAdminDeleteAct, executeAdminDeleteAct,isMemberHistoryModalOpen, selectedDutyMember, openMemberDutyHistory, selectedMemberDutyHistory,
                 
                 // 協勤專屬
-                assistanceStep, assistanceForm, afTried, afConfirm, afHours, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
+                assistanceStep, assistanceForm, afTried, afConfirm, afHours, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
                 isAssistTimeModalOpen, assistTempStart, assistTempEnd, openAssistTimeModal, selectAssistHour, resetAssistTimeSelection, confirmAssistTime, isAssistHourDisabled,
                 activeAssistTab, visibleAssistTabs, assistSlider, assistTabsScrollRef, scrollToAssistTab, onAssistSliderScroll, dynamicMemberHours,displayEmtExpiry,exportPaymentRequestToExcel,
                 myAssistanceRecords, allAssistanceRecords, isAssistEditModalOpen, editingAssistRecord, openAssistEditModal, submitAssistEdit, deleteAssistRecord, handleTimeInput,
