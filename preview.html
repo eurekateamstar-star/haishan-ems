@@ -403,6 +403,13 @@
         .afs-desc{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;min-height:64px;background:#f8fafc;border:1.5px dashed #c7d6fb;border-radius:14px;padding:12px;font-size:14px;font-weight:700;color:#0f172a;line-height:1.5}
         .afs-desc .ph{color:#1d4ed8;font-weight:800}
         .afs-preview{background:#f1f5ff;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:800;color:#1d4ed8;min-height:44px;line-height:1.5}
+        .afs-dists{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin-top:8px;background:#f8fafc;border-radius:12px;padding:8px}
+        .afs-dists button{all:unset;cursor:pointer;text-align:center;padding:7px 0;border-radius:9px;font-size:12px;font-weight:800;color:#475569;background:#fff;border:1px solid #e7eaf0}
+        .afs-dists button.on{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+        .afs-units{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+        .afs-units span{font-family:Inter,sans-serif;font-size:13px;font-weight:800;color:#64748b;margin-right:2px}
+        .afs-units button{all:unset;cursor:pointer;min-width:44px;height:40px;padding:0 10px;box-sizing:border-box;border-radius:11px;background:#1d4ed8;color:#fff;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center}
+        .afs-sug b{font-weight:800}
         .af-sum .row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:6px 0}
         .af-sum .row span{color:#64748b;font-weight:700}.af-sum .row b{font-weight:900;color:#0f172a;text-align:right}
         .af-sum .cs{border-top:1px solid #f1f3f6;padding:10px 0}
@@ -3297,22 +3304,18 @@
             </template>
             <template v-if="afStep === 3">
                 <div class="afs-q">發生地點</div>
-                <div class="af-chips" style="margin-bottom:12px"><button v-for="d in ['板橋區','中和區','新莊區','土城區','樹林區','其他']" :key="d" :class="{ on: afDraft.district === d }" @click="afDraft.district = d">{{ d }}</button></div>
-                <div class="afs-sub" style="margin-top:0">路名或地標</div>
-                <input type="text" v-model="afAddr.st" @input="afAddrSug(); afComposeAddr()" placeholder="打一兩個字，例如「中正」" class="af-in" :class="{ err: afDraft.errAddress && !afAddr.st }">
-                <div v-if="afStSug.length" class="afs-sug"><button v-for="st in afStSug" :key="st" @click="afAddr.st = st; afStSug = []; afComposeAddr()">{{ st }}</button></div>
-                <div v-if="!afAddr.st && afTopStreets.length" class="af-chips sm" style="margin-top:8px"><button v-for="st in afTopStreets" :key="st" @click="afAddr.st = st; afComposeAddr()"><i class="fa-solid fa-road mr-1 opacity-40"></i>{{ st }}</button></div>
-                <div class="afs-sub">門牌<em>只填有的就好</em></div>
-                <div class="afs-door">
-                    <label v-for="k in AF_DOOR" :key="k[0]"><input type="text" :inputmode="k[0] === 'no' ? 'text' : 'numeric'" v-model="afAddr[k[0]]" @input="afComposeAddr()" :placeholder="k[2]"><span>{{ k[1] }}</span></label>
-                </div>
-                <div class="flex gap-2 mt-2"><button class="afs-mini" @click="afAddr.no = (afAddr.no || '') + '之'; afComposeAddr()">號加「之」</button><button class="afs-mini" @click="afAddr.fl = 'B1'; afComposeAddr()">地下室 B1</button><button class="afs-mini" @click="afClearDoor">清除門牌</button></div>
-                <div class="afs-addr"><span>完整地址</span><b>{{ afDraft.district }} {{ afDraft.address || '—' }}</b></div>
+                <div class="af-chips"><button v-for="d in AF_MAIN_DIST" :key="d" :class="{ on: afDraft.district === d }" @click="afDraft.district = d; afDistMore = false">{{ d }}</button><button :class="{ on: !AF_MAIN_DIST.includes(afDraft.district) }" @click="afDistMore = !afDistMore">{{ AF_MAIN_DIST.includes(afDraft.district) || !afDraft.district ? '其他區' : afDraft.district }} <i class="fa-solid fa-chevron-down text-[9px] ml-0.5"></i></button></div>
+                <div v-if="afDistMore" class="afs-dists"><button v-for="d in afOtherDists" :key="d" :class="{ on: afDraft.district === d }" @click="afDraft.district = d; afDistMore = false">{{ d.replace('區', '') }}</button></div>
+                <div class="afs-sub" style="margin-top:12px">地址<em>打路名的前一兩個字，再打門牌數字</em></div>
+                <input id="afs-addr" type="text" v-model="afDraft.address" @input="afDraft.errAddress = false; if (afDraft.errMsg === '請填發生地點') afDraft.errMsg = ''" placeholder="例如：光武 → 光武街220巷5號" class="af-in" :class="{ err: afDraft.errAddress }" autocomplete="off">
+                <div v-if="afSmart.mode === 'unit'" class="afs-units"><span>{{ afSmart.num }} 是</span><button v-for="u in afSmart.units" :key="u" @click="afAppend(u)">{{ u }}</button></div>
+                <div v-else-if="afSmart.roads.length" class="afs-sug"><button v-for="r in afSmart.roads" :key="r.d + r.r" @click="afPickRoad(r)"><b>{{ r.r }}</b><span v-if="r.d !== afDraft.district" class="text-[11px] text-slate-400 ml-2">{{ r.d }}</span></button></div>
+                <div v-else-if="afSmart.mode === 'roadok'" class="text-[11px] font-bold text-slate-400 mt-1.5">接著打門牌數字，例如 220，會讓你選巷、號或樓</div>
+                <div class="afs-addr"><span>完整地址</span><b>新北市{{ afDraft.district }} {{ afDraft.address || '—' }}</b></div>
                 <template v-if="afTopPlaces.length">
-                    <div class="afs-sub">{{ afDraft.district }}最近填過<em>點一下整個帶入</em></div>
-                    <div class="af-chips sm"><button v-for="pl in afTopPlaces" :key="pl" :class="{ on: afDraft.address === pl }" @click="afSetAddr(pl)"><i class="fa-solid fa-clock-rotate-left mr-1 opacity-40"></i>{{ pl }}</button></div>
+                    <div class="afs-sub">{{ afDraft.district }}最近填過<em>點一下帶入</em></div>
+                    <div class="af-chips sm"><button v-for="pl in afTopPlaces" :key="pl" :class="{ on: afDraft.address === pl }" @click="afDraft.address = pl; afDraft.errAddress = false"><i class="fa-solid fa-clock-rotate-left mr-1 opacity-40"></i>{{ pl }}</button></div>
                 </template>
-            </template>
             </template>
             <template v-if="afStep === 4">
                 <div class="afs-q">救出人數</div>
@@ -7161,6 +7164,45 @@ const handleTimeInput = (item, field, formType) => {
             const afOtherTypes = computed(() => caseTypes.filter((t) => !afTopTypes.value.includes(t)));
             const afPickType = (n) => { afDraft.value.type = n; afDraft.value.errMsg = ''; setTimeout(afNext, 120); };
             const afTopPlaces = computed(() => afAllPlaces.value.filter((p) => /\d/.test(p)).slice(0, 6));
+            const AF_MAIN_DIST = ['板橋區', '中和區', '新莊區', '土城區', '樹林區'];
+            const AF_ALL_DIST = ['板橋區', '三重區', '中和區', '永和區', '新莊區', '新店區', '樹林區', '鶯歌區', '三峽區', '淡水區', '汐止區', '瑞芳區', '土城區', '蘆洲區', '五股區', '泰山區', '林口區', '深坑區', '石碇區', '坪林區', '三芝區', '石門區', '八里區', '平溪區', '雙溪區', '貢寮區', '金山區', '萬里區', '烏來區'];
+            const afOtherDists = AF_ALL_DIST.filter((d) => !AF_MAIN_DIST.includes(d));
+            const afDistMore = ref(false);
+            const afRoads = ref(null);
+            const afLoadRoads = () => { if (afRoads.value) return; fetch('js/ntpc-roads.json').then((r) => r.json()).then((j) => { afRoads.value = j; }).catch(() => {}); };
+            const AF_UNITS = ['巷', '弄', '號', '樓'];
+            const afSmart = computed(() => {
+                const d = afDraft.value; const none = { mode: '', roads: [], units: [], num: '' };
+                if (!d) return none;
+                const t = (d.address || '').trim();
+                if (!t) return none;
+                const m = /(\d+)$/.exec(t);
+                if (m) {
+                    if (/之\d+$/.test(t)) return { mode: 'unit', roads: [], units: ['號', '樓'], num: m[1] };
+                    let last = -1; AF_UNITS.forEach((u, i) => { if (t.includes(u)) last = i; });
+                    const units = AF_UNITS.slice(last + 1);
+                    if (last < 2) units.push('之');
+                    if (!t.slice(0, -m[1].length).trim()) return none;   // 只有數字
+                    return { mode: 'unit', roads: [], units, num: m[1] };
+                }
+                if (/\d/.test(t)) return none;
+                const all = afRoads.value || {};
+                const here = [...new Set([...(all[d.district] || []), ...(d.district === '板橋區' ? streetList : [])])];
+                if (here.includes(t)) return { ...none, mode: 'roadok' };
+                const cn = (r) => r.replace(/[一二三四五六七八九]段/, (x) => '一二三四五六七八九'.indexOf(x[0]) + 1 + '段');
+                const cmp = (a, b) => (a.startsWith(t) ? 0 : 1) - (b.startsWith(t) ? 0 : 1) || a.length - b.length || cn(a).localeCompare(cn(b), 'zh-Hant');
+                const score = null;
+                let roads = here.filter((r) => r.includes(t)).sort(cmp).slice(0, 8).map((r) => ({ r, d: d.district }));
+                if (!roads.length) {
+                    roads = [];
+                    Object.keys(all).forEach((dist) => all[dist].forEach((r) => { if (r.includes(t)) roads.push({ r, d: dist }); }));
+                    roads = roads.sort((a, b) => cmp(a.r, b.r)).slice(0, 8);
+                }
+                return { mode: 'road', roads, units: [], num: '' };
+            });
+            const afFocusAddr = () => nextTick(() => { const el = document.getElementById('afs-addr'); if (el) { el.focus(); const n = el.value.length; try { el.setSelectionRange(n, n); } catch (_) {} } });
+            const afPickRoad = (x) => { const d = afDraft.value; d.address = x.r; if (x.d !== d.district) d.district = x.d; d.errAddress = false; afFocusAddr(); };
+            const afAppend = (u) => { const d = afDraft.value; d.address = (d.address || '').trim() + u; afFocusAddr(); };
             const AF_DOOR = [['lane', '巷', ''], ['alley', '弄', ''], ['no', '號', ''], ['fl', '樓', '']];
             const afAddr = ref({ st: '', lane: '', alley: '', no: '', fl: '' });
             const afStSug = ref([]);
@@ -7231,7 +7273,7 @@ const handleTimeInput = (item, field, formType) => {
                 afEditIdx.value = idx;
                 afDraft.value = idx < 0 ? afBlank() : { ...afBlank(), ...JSON.parse(JSON.stringify(f.cases[idx])), errMsg: '', showSuggestions: false, suggestions: [] };
                 afStep.value = 1;
-                afAddr.value = afParseAddr(afDraft.value.address); afStSug.value = []; afQa.value = afQaFrom(afDraft.value.description); afQaOpen.value = false;
+                afLoadRoads(); afDistMore.value = false; afQa.value = afQaFrom(afDraft.value.description); afQaOpen.value = false;
                 nextTick(() => { const el = document.getElementById('afs-start'); if (el && idx < 0) el.focus(); });
             };
             const afT2m = (t) => { const m = /^(\d{2}):(\d{2})$/.exec(t || ''); return m ? +m[1] * 60 + +m[2] : -1; };
@@ -7255,7 +7297,7 @@ const handleTimeInput = (item, field, formType) => {
                 if (afStep.value === 2 && !d.type) { d.errMsg = '請選一個救護種類'; return; }
                 if (afStep.value === 3) {
                     if (!d.district) { d.errMsg = '請選區域'; return; }
-                    afComposeAddr(); if (!afAddr.value.st || !afAddr.value.st.trim()) { d.errAddress = true; d.errMsg = '請填路名或地標'; return; }
+                    if (!d.address || !d.address.trim()) { d.errAddress = true; d.errMsg = '請填發生地點'; return; }
                 }
                 d.errMsg = '';
                 if (afStep.value < 4) { afStep.value++; return; }
@@ -7706,7 +7748,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 openAdminDeleteActivity, adminDeleteableActivities, confirmAdminDeleteAct, executeAdminDeleteAct,isMemberHistoryModalOpen, selectedDutyMember, openMemberDutyHistory, selectedMemberDutyHistory,
                 
                 // 協勤專屬
-                assistanceStep, assistanceForm, afTried, afConfirm, afHours, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
+                assistanceStep, assistanceForm, afTried, afConfirm, afHours, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
                 isAssistTimeModalOpen, assistTempStart, assistTempEnd, openAssistTimeModal, selectAssistHour, resetAssistTimeSelection, confirmAssistTime, isAssistHourDisabled,
                 activeAssistTab, visibleAssistTabs, assistSlider, assistTabsScrollRef, scrollToAssistTab, onAssistSliderScroll, dynamicMemberHours,displayEmtExpiry,exportPaymentRequestToExcel,
                 myAssistanceRecords, allAssistanceRecords, isAssistEditModalOpen, editingAssistRecord, openAssistEditModal, submitAssistEdit, deleteAssistRecord, handleTimeInput,
