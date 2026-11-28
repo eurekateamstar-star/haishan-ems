@@ -363,6 +363,21 @@
         .af-seg button+button{border-left:1px solid #e2e8f0}.af-seg button.on{background:#1d4ed8;color:#fff}
         .af-add{all:unset;box-sizing:border-box;cursor:pointer;height:48px;border-radius:14px;border:1.5px dashed #b9c8ec;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:900;color:#1d4ed8;background:#f8faff}
         .af-submit{all:unset;box-sizing:border-box;cursor:pointer;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;background:linear-gradient(135deg,#1d4ed8,#3b82f6);box-shadow:0 12px 22px -14px #1d4ed8}
+        .af-row{display:flex;align-items:center;gap:12px;padding:12px 0;cursor:pointer}
+        .af-row+.af-row{border-top:1px solid #f1f3f6}
+        .af-row .no{width:28px;height:28px;border-radius:9px;background:#eef3ff;color:#1d4ed8;font-family:Inter,sans-serif;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .af-row .t{display:flex;gap:8px;align-items:baseline;font-size:14px;color:#0f172a}.af-row .t span{color:#64748b;font-size:13px}.af-row .t b{font-weight:900}
+        .af-row .s{font-size:12px;color:#64748b;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+        .af-row .e{font-size:11px;font-weight:800;color:#e11d48;margin-top:3px}
+        .af-row.bad .no{background:#ffe4e6;color:#e11d48}
+        .af-row .del{all:unset;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#94a3b8;cursor:pointer;flex-shrink:0}
+        .afs-steps{display:flex;gap:4px;margin:2px 0 12px}.afs-steps i{flex:1;height:4px;border-radius:2px;background:#e3e8ef}.afs-steps i.on{background:#1d4ed8}
+        .afs-q{font-size:20px;font-weight:900;color:#0f172a;margin-bottom:12px}
+        .afs-sug{margin-top:6px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden}
+        .afs-sug button{all:unset;display:block;width:100%;box-sizing:border-box;padding:10px 12px;font-size:14px;font-weight:700;color:#334155;cursor:pointer}.afs-sug button+button{border-top:1px solid #f1f3f6}
+        .afs-btns{display:flex;gap:8px;margin-top:16px}
+        .afs-btns button{all:unset;flex:1;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;cursor:pointer}
+        .afs-btns .pri{background:#1d4ed8;color:#fff;flex:2}.afs-btns .sec{background:#f1f5f9;color:#475569}
         .af-sum .row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:6px 0}
         .af-sum .row span{color:#64748b;font-weight:700}.af-sum .row b{font-weight:900;color:#0f172a;text-align:right}
         .af-sum .cs{border-top:1px solid #f1f3f6;padding:10px 0}
@@ -1284,41 +1299,19 @@
 
                             <div class="af-sec"><span>救護案件<b>{{ assistanceForm.cases.length }}</b></span><small>沒有案件可以不加</small></div>
 
-                            <section v-for="(caseItem, idx) in assistanceForm.cases" :key="idx" :id="'afc-' + idx" class="af-card af-case" :class="{ bad: afCaseBad(caseItem) }">
-                                <div class="top"><span class="no">第 {{ ['一','二','三','四','五','六','七','八','九','十'][idx] || idx + 1 }} 件</span><button class="del" @click="assistanceForm.cases.splice(idx, 1)" aria-label="刪除這一件"><i class="fa-solid fa-trash-can"></i></button></div>
-                                <div>
-                                    <div class="af-lab" :class="{ err: caseItem.errStart || caseItem.errEnd }">救護時間<em>打 4 碼，例如 1230</em></div>
-                                    <div class="af-tt">
-                                        <label :class="{ err: caseItem.errStart }"><span>開始</span><input type="tel" v-model="caseItem.startTime" @blur="handleTimeInput(caseItem, 'startTime', 'new')" placeholder="12:30" maxlength="5"></label>
-                                        <label :class="{ err: caseItem.errEnd }"><span>結束</span><input type="tel" v-model="caseItem.endTime" @blur="handleTimeInput(caseItem, 'endTime', 'new')" placeholder="13:45" maxlength="5"></label>
+                            <div v-if="assistanceForm.cases.length" class="af-card" style="padding:4px 14px">
+                                <div v-for="(c, idx) in assistanceForm.cases" :key="idx" :id="'afc-' + idx" class="af-row" :class="{ bad: afCaseBad(c) }" @click="afOpen(idx)">
+                                    <span class="no">{{ idx + 1 }}</span>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="t"><span class="font-num">{{ c.startTime }}–{{ c.endTime }}</span><b>{{ c.type }}</b></div>
+                                        <div class="s">{{ c.district }} {{ c.address }}・救出 {{ c.rescuedCount }} 人<template v-if="c.description">・{{ c.description }}</template></div>
+                                        <div v-if="c.errMsg || afCaseBad(c)" class="e"><i class="fa-solid fa-circle-exclamation"></i> {{ c.errMsg || '有欄位沒填，點這裡修改' }}</div>
                                     </div>
-                                    <div v-if="caseItem.errMsg" class="af-err"><i class="fa-solid fa-circle-exclamation mt-0.5"></i>{{ caseItem.errMsg }}</div>
+                                    <button class="del" @click.stop="assistanceForm.cases.splice(idx, 1)" aria-label="刪除這一件"><i class="fa-solid fa-trash-can"></i></button>
                                 </div>
-                                <div>
-                                    <div class="af-lab" :class="{ err: caseItem.errType }">救護種類</div>
-                                    <div class="af-chips" :class="{ err: caseItem.errType }"><button v-for="t in caseTypes" :key="t.name" :class="{ on: caseItem.type === t.name }" @click="caseItem.type = t.name; caseItem.errType = false">{{ t.name }}</button></div>
-                                </div>
-                                <div>
-                                    <div class="af-lab" :class="{ err: caseItem.errDistrict || caseItem.errAddress }">發生地點</div>
-                                    <div class="af-chips" :class="{ err: caseItem.errDistrict }" style="margin-bottom:7px"><button v-for="d in ['板橋區','中和區','新莊區','土城區','樹林區','其他']" :key="d" :class="{ on: caseItem.district === d }" @click="caseItem.district = d; caseItem.errDistrict = false">{{ d }}</button></div>
-                                    <div class="relative">
-                                        <input type="text" v-model="caseItem.address" @input="handleAddressInput(caseItem)" @focus="handleAddressInput(caseItem)" @blur="hideSuggestions(caseItem)" placeholder="路/街/段/巷/弄/號/樓 或地標" class="af-in" :class="{ err: caseItem.errAddress }">
-                                        <ul v-if="caseItem.showSuggestions && caseItem.suggestions.length > 0" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
-                                            <li v-for="street in caseItem.suggestions" :key="street" @mousedown.prevent="selectStreet(caseItem, street)" class="px-4 py-3 text-sm font-bold text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-50 last:border-b-0">{{ street }}</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="af-lab">救出人數</div>
-                                    <div class="af-seg"><button v-for="n in [0, 1, 2, 3, 4, '>4']" :key="n" :class="{ on: caseItem.rescuedCount === n }" @click="caseItem.rescuedCount = n">{{ n }}</button></div>
-                                </div>
-                                <div>
-                                    <div class="af-lab">現場狀況及後續處置<em>選填</em></div>
-                                    <textarea v-model="caseItem.description" placeholder="請簡述現場狀況..." class="af-in" style="height:72px;resize:none"></textarea>
-                                </div>
-                            </section>
+                            </div>
 
-                            <button class="af-add" @click="afAddCase"><i class="fa-solid fa-plus"></i>{{ assistanceForm.cases.length ? '再加一件' : '加一件救護案件' }}</button>
+                            <button class="af-add" @click="afOpen(-1)"><i class="fa-solid fa-plus"></i>{{ assistanceForm.cases.length ? '再加一件' : '加一件救護案件' }}</button>
                             <button class="af-submit" @click="afSubmit">{{ assistanceForm.cases.length ? '送出紀錄' : '送出（只登記協勤時間）' }}</button>
                         </div>
                     </div>
@@ -3235,6 +3228,42 @@
                 <button class="go" @click="goTask({ t, kind: regSheet }); regSheet = null">查看 ›</button>
             </div>
             <div v-if="!(regSheet === 'duty' ? myDutyList : myMeetingList).length" class="none">{{ regSheet === 'duty' ? '還沒有登記任何公差' : '還沒有登記任何會議' }}</div>
+        </div>
+    </div>
+    <div v-if="afDraft" class="rsheet-bg" @click.self="afDraft = null">
+        <div class="rsheet" style="--c:#1d4ed8">
+            <div class="grab"></div>
+            <div class="sh">第 {{ afEditIdx < 0 ? assistanceForm.cases.length + 1 : afEditIdx + 1 }} 件<span class="text-xs font-bold text-slate-400">{{ afStep }} / 4</span><button @click="afDraft = null" aria-label="關閉"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="afs-steps"><i v-for="n in 4" :key="n" :class="{ on: n <= afStep }"></i></div>
+            <template v-if="afStep === 1">
+                <div class="afs-q">救護時間</div>
+                <div class="af-tt">
+                    <label :class="{ err: afDraft.errStart }"><span>開始（打 4 碼，例如 1527）</span><input id="afs-start" type="tel" inputmode="numeric" v-model="afDraft.startTime" @blur="afTime('startTime')" placeholder="15:27" maxlength="5"></label>
+                    <label :class="{ err: afDraft.errEnd }"><span>結束</span><input type="tel" inputmode="numeric" v-model="afDraft.endTime" @blur="afTime('endTime')" placeholder="16:27" maxlength="5"></label>
+                </div>
+                <div class="text-[11px] font-bold text-slate-400 mt-2">協勤時段 {{ assistanceForm.startTime }} – {{ assistanceForm.endTime }}</div>
+            </template>
+            <template v-if="afStep === 2">
+                <div class="afs-q">救護種類</div>
+                <div class="af-chips"><button v-for="t in caseTypes" :key="t.name" :class="{ on: afDraft.type === t.name }" @click="afDraft.type = t.name; afDraft.errMsg = ''; afNext()">{{ t.name }}</button></div>
+            </template>
+            <template v-if="afStep === 3">
+                <div class="afs-q">發生地點</div>
+                <div class="af-chips" style="margin-bottom:8px"><button v-for="d in ['板橋區','中和區','新莊區','土城區','樹林區','其他']" :key="d" :class="{ on: afDraft.district === d }" @click="afDraft.district = d">{{ d }}</button></div>
+                <input type="text" v-model="afDraft.address" @input="handleAddressInput(afDraft)" placeholder="路/街/段/巷/弄/號/樓 或地標" class="af-in" :class="{ err: afDraft.errAddress }">
+                <div v-if="afDraft.showSuggestions && afDraft.suggestions.length" class="afs-sug"><button v-for="st in afDraft.suggestions" :key="st" @click="afDraft.address = st; afDraft.showSuggestions = false; afDraft.errAddress = false">{{ st }}</button></div>
+            </template>
+            <template v-if="afStep === 4">
+                <div class="afs-q">救出人數</div>
+                <div class="af-seg"><button v-for="n in [0, 1, 2, 3, 4, '>4']" :key="n" :class="{ on: afDraft.rescuedCount === n }" @click="afDraft.rescuedCount = n">{{ n }}</button></div>
+                <div class="af-lab" style="margin-top:14px">現場狀況及後續處置<em>選填</em></div>
+                <textarea v-model="afDraft.description" placeholder="請簡述現場狀況..." class="af-in" style="height:72px;resize:none"></textarea>
+            </template>
+            <div v-if="afDraft.errMsg" class="af-err"><i class="fa-solid fa-circle-exclamation mt-0.5"></i>{{ afDraft.errMsg }}</div>
+            <div class="afs-btns">
+                <button class="sec" @click="afStep > 1 ? (afStep--, afDraft.errMsg = '') : (afDraft = null)">{{ afStep > 1 ? '上一步' : '取消' }}</button>
+                <button class="pri" @click="afNext">{{ afStep < 4 ? '下一步' : (afEditIdx < 0 ? '加入這一件' : '儲存修改') }}</button>
+            </div>
         </div>
     </div>
     <div v-if="afConfirm" class="rsheet-bg" @click.self="afConfirm = false">
@@ -7052,6 +7081,49 @@ const handleTimeInput = (item, field, formType) => {
             };
 
             const afTried = ref(false), afConfirm = ref(false);
+            const afDraft = ref(null), afEditIdx = ref(-1), afStep = ref(1);
+            const afBlank = () => ({ startTime: '', endTime: '', district: '板橋區', address: '', type: '', description: '', rescuedCount: 0,
+                errStart: false, errEnd: false, errType: false, errDistrict: false, errAddress: false, errMsg: '', showSuggestions: false, suggestions: [] });
+            const afOpen = (idx) => {
+                const f = assistanceForm.value;
+                afTried.value = true;
+                if (!f.startTime || !f.endTime) { showAppAlert('error', '提示', '請先選協勤起訖時間'); afScrollTo('af-shift'); return; }
+                afEditIdx.value = idx;
+                afDraft.value = idx < 0 ? afBlank() : { ...afBlank(), ...JSON.parse(JSON.stringify(f.cases[idx])), errMsg: '', showSuggestions: false, suggestions: [] };
+                afStep.value = 1;
+                nextTick(() => { const el = document.getElementById('afs-start'); if (el && idx < 0) el.focus(); });
+            };
+            const afT2m = (t) => { const m = /^(\d{2}):(\d{2})$/.exec(t || ''); return m ? +m[1] * 60 + +m[2] : -1; };
+            const afTime = (field) => { const d = afDraft.value; if (!d) return; handleTimeInput(d, field, 'new'); };
+            const afCheckTime = () => {
+                const d = afDraft.value, f = assistanceForm.value;
+                d.errStart = d.errEnd = false;
+                const a = afT2m(d.startTime), b = afT2m(d.endTime);
+                if (a < 0) { d.errStart = true; d.errMsg = '請輸入完整的 4 碼時間 (如 0900)'; return false; }
+                if (b < 0) { d.errEnd = true; d.errMsg = '請輸入完整的 4 碼時間 (如 0900)'; return false; }
+                if (a >= b) { d.errEnd = true; d.errMsg = '開始時間必須「小於」結束時間'; return false; }
+                if (a < afT2m(f.startTime)) { d.errStart = true; d.errMsg = `需晚於協勤開始 (${f.startTime})`; return false; }
+                if (b > afT2m(f.endTime)) { d.errEnd = true; d.errMsg = `需早於協勤結束 (${f.endTime})`; return false; }
+                const hit = f.cases.find((c, i) => i !== afEditIdx.value && afT2m(c.startTime) < b && a < afT2m(c.endTime));
+                if (hit) { d.errStart = true; d.errMsg = `時間重疊！跟 ${hit.startTime}–${hit.endTime} 那件撞到`; return false; }
+                d.errMsg = ''; return true;
+            };
+            const afNext = () => {
+                const d = afDraft.value; if (!d) return;
+                if (afStep.value === 1 && !afCheckTime()) return;
+                if (afStep.value === 2 && !d.type) { d.errMsg = '請選一個救護種類'; return; }
+                if (afStep.value === 3) {
+                    if (!d.district) { d.errMsg = '請選區域'; return; }
+                    if (!d.address || !d.address.trim()) { d.errAddress = true; d.errMsg = '請填發生地點'; return; }
+                }
+                d.errMsg = '';
+                if (afStep.value < 4) { afStep.value++; return; }
+                const out = { ...d, errStart: false, errEnd: false, errType: false, errDistrict: false, errAddress: false, errMsg: '', showSuggestions: false, suggestions: [] };
+                const list = assistanceForm.value.cases;
+                if (afEditIdx.value < 0) list.push(out); else list.splice(afEditIdx.value, 1, out);
+                list.sort((x, y) => afT2m(x.startTime) - afT2m(y.startTime));
+                afDraft.value = null;
+            };
             const afHours = computed(() => {
                 const f = assistanceForm.value; if (!f.startTime || !f.endTime) return 0;
                 return parseInt(f.endTime) - parseInt(f.startTime);
@@ -7493,7 +7565,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 openAdminDeleteActivity, adminDeleteableActivities, confirmAdminDeleteAct, executeAdminDeleteAct,isMemberHistoryModalOpen, selectedDutyMember, openMemberDutyHistory, selectedMemberDutyHistory,
                 
                 // 協勤專屬
-                assistanceStep, assistanceForm, afTried, afConfirm, afHours, afCaseBad, afAddCase, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
+                assistanceStep, assistanceForm, afTried, afConfirm, afHours, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
                 isAssistTimeModalOpen, assistTempStart, assistTempEnd, openAssistTimeModal, selectAssistHour, resetAssistTimeSelection, confirmAssistTime, isAssistHourDisabled,
                 activeAssistTab, visibleAssistTabs, assistSlider, assistTabsScrollRef, scrollToAssistTab, onAssistSliderScroll, dynamicMemberHours,displayEmtExpiry,exportPaymentRequestToExcel,
                 myAssistanceRecords, allAssistanceRecords, isAssistEditModalOpen, editingAssistRecord, openAssistEditModal, submitAssistEdit, deleteAssistRecord, handleTimeInput,
