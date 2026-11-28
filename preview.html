@@ -378,6 +378,21 @@
         .afs-btns{display:flex;gap:8px;margin-top:16px}
         .afs-btns button{all:unset;flex:1;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;cursor:pointer}
         .afs-btns .pri{background:#1d4ed8;color:#fff;flex:2}.afs-btns .sec{background:#f1f5f9;color:#475569}
+        .afs-sub{font-size:11px;font-weight:900;color:#94a3b8;margin:12px 0 6px;letter-spacing:.04em}.afs-sub em{font-style:normal;font-weight:700;margin-left:6px}
+        .afs-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+        .afs-tiles.big{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+        .afs-tiles button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 2px;border-radius:12px;border:1px solid #e7eaf0;background:#fff;text-align:center}
+        .afs-tiles button i{font-size:15px;color:#64748b}.afs-tiles button span{font-size:11px;font-weight:800;color:#334155;line-height:1.2}
+        .afs-tiles.big button{padding:13px 2px;border-radius:14px;background:#f8faff;border-color:#dfe7fb}
+        .afs-tiles.big button i{font-size:20px;color:#1d4ed8}.afs-tiles.big button span{font-size:14px;font-weight:900}
+        .afs-tiles button.on{background:#1d4ed8;border-color:#1d4ed8}.afs-tiles button.on i,.afs-tiles button.on span{color:#fff}
+        .af-chips.sm button{font-size:12px;padding:5px 9px}
+        .afs-pt{display:flex;align-items:center;gap:6px;margin-top:4px}
+        .afs-pt span{font-size:13px;font-weight:800;color:#475569}
+        .afs-pt input{width:64px;height:38px;border-radius:11px;border:1.5px solid #eef1f5;background:#f8fafc;text-align:center;font-family:Inter,sans-serif;font-size:17px;font-weight:800;outline:none}
+        .afs-pt button{all:unset;cursor:pointer;width:44px;height:38px;border-radius:11px;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#475569}
+        .afs-pt button.on{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+        .rsheet{max-height:86vh}
         .af-sum .row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:6px 0}
         .af-sum .row span{color:#64748b;font-weight:700}.af-sum .row b{font-weight:900;color:#0f172a;text-align:right}
         .af-sum .cs{border-top:1px solid #f1f3f6;padding:10px 0}
@@ -3245,19 +3260,36 @@
             </template>
             <template v-if="afStep === 2">
                 <div class="afs-q">救護種類</div>
-                <div class="af-chips"><button v-for="t in caseTypes" :key="t.name" :class="{ on: afDraft.type === t.name }" @click="afDraft.type = t.name; afDraft.errMsg = ''; afNext()">{{ t.name }}</button></div>
+                <div class="afs-sub">常用</div>
+                <div class="afs-tiles big"><button v-for="t in afTopTypes" :key="'tt' + t.name" :class="{ on: afDraft.type === t.name }" @click="afPickType(t.name)"><i :class="'fa-solid ' + t.icon"></i><span>{{ t.name }}</span></button></div>
+                <div class="afs-sub">其他種類</div>
+                <div class="afs-tiles"><button v-for="t in afOtherTypes" :key="'ot' + t.name" :class="{ on: afDraft.type === t.name }" @click="afPickType(t.name)"><i :class="'fa-solid ' + t.icon"></i><span>{{ t.name }}</span></button></div>
             </template>
             <template v-if="afStep === 3">
                 <div class="afs-q">發生地點</div>
-                <div class="af-chips" style="margin-bottom:8px"><button v-for="d in ['板橋區','中和區','新莊區','土城區','樹林區','其他']" :key="d" :class="{ on: afDraft.district === d }" @click="afDraft.district = d">{{ d }}</button></div>
+                <div class="af-chips" style="margin-bottom:10px"><button v-for="d in ['板橋區','中和區','新莊區','土城區','樹林區','其他']" :key="d" :class="{ on: afDraft.district === d }" @click="afDraft.district = d">{{ d }}</button></div>
                 <input type="text" v-model="afDraft.address" @input="handleAddressInput(afDraft)" placeholder="路/街/段/巷/弄/號/樓 或地標" class="af-in" :class="{ err: afDraft.errAddress }">
                 <div v-if="afDraft.showSuggestions && afDraft.suggestions.length" class="afs-sug"><button v-for="st in afDraft.suggestions" :key="st" @click="afDraft.address = st; afDraft.showSuggestions = false; afDraft.errAddress = false">{{ st }}</button></div>
+                <template v-if="afTopPlaces.length">
+                    <div class="afs-sub">{{ afDraft.district }}常用地點<em>點一下帶入，再補門牌</em></div>
+                    <div class="af-chips"><button v-for="pl in afTopPlaces" :key="pl" :class="{ on: afDraft.address === pl }" @click="afDraft.address = pl; afDraft.errAddress = false; afDraft.showSuggestions = false"><i class="fa-solid fa-location-dot mr-1 opacity-50"></i>{{ pl }}</button></div>
+                </template>
             </template>
             <template v-if="afStep === 4">
                 <div class="afs-q">救出人數</div>
                 <div class="af-seg"><button v-for="n in [0, 1, 2, 3, 4, '>4']" :key="n" :class="{ on: afDraft.rescuedCount === n }" @click="afDraft.rescuedCount = n">{{ n }}</button></div>
-                <div class="af-lab" style="margin-top:14px">現場狀況及後續處置<em>選填</em></div>
-                <textarea v-model="afDraft.description" placeholder="請簡述現場狀況..." class="af-in" style="height:72px;resize:none"></textarea>
+                <div class="af-lab" style="margin-top:16px">現場狀況及後續處置<em>選填・點下面的字快速帶入</em></div>
+                <div class="afs-pt">
+                    <span>患者</span>
+                    <input type="tel" inputmode="numeric" maxlength="3" v-model="afAge" @input="afApplyPt" placeholder="年齡" aria-label="年齡">
+                    <span>歲</span>
+                    <button v-for="x in ['男', '女']" :key="x" :class="{ on: afSex === x }" @click="afSex = afSex === x ? '' : x; afApplyPt()">{{ x }}</button>
+                </div>
+                <div class="afs-sub">狀況</div>
+                <div class="af-chips sm"><button v-for="w in AF_SX" :key="w" :class="{ on: afHas(w) }" @click="afWord(w, 'sx')">{{ w }}</button></div>
+                <div class="afs-sub">處置</div>
+                <div class="af-chips sm"><button v-for="w in AF_TX" :key="w" :class="{ on: afHas(w) }" @click="afWord(w, 'tx')">{{ w }}</button></div>
+                <textarea v-model="afDraft.description" placeholder="例如：58歲男，意識清楚，頭部撕裂傷；處置：包紮止血、送醫" class="af-in" style="height:78px;resize:none;margin-top:10px"></textarea>
             </template>
             <div v-if="afDraft.errMsg" class="af-err"><i class="fa-solid fa-circle-exclamation mt-0.5"></i>{{ afDraft.errMsg }}</div>
             <div class="afs-btns">
@@ -7082,6 +7114,55 @@ const handleTimeInput = (item, field, formType) => {
 
             const afTried = ref(false), afConfirm = ref(false);
             const afDraft = ref(null), afEditIdx = ref(-1), afStep = ref(1);
+            const AF_SX = ['意識清楚', '意識不清', '頭暈', '胸痛', '呼吸困難', '腹痛', '發燒', '抽搐', '酒醉', '擦挫傷', '撕裂傷', '骨折疑慮', '出血', '燒燙傷', '無外傷'];
+            const AF_TX = ['包紮止血', '傷口清潔', '固定', '頸圈固定', '冰敷', '給氧', '測量生命徵象', '血糖測量', 'CPR', 'AED', '安撫情緒', '協助送醫', '拒絕送醫', '現場處理完畢'];
+            const AF_DEF_TYPES = ['急病', '路倒', '車禍', '一般受傷', 'OHCA', '緊急救援'];
+            const afTypeCount = computed(() => {
+                const m = {}; (allAssistanceRecords.value || []).forEach((r) => (r.cases || []).forEach((c) => { if (c.caseType) m[c.caseType] = (m[c.caseType] || 0) + 1; }));
+                return m;
+            });
+            const afTopTypes = computed(() => {
+                const m = afTypeCount.value;
+                const names = Object.keys(m).length ? [...caseTypes].sort((a, b) => (m[b.name] || 0) - (m[a.name] || 0)).slice(0, 6).map((t) => t.name) : AF_DEF_TYPES;
+                return names.map((n) => caseTypes.find((t) => t.name === n)).filter(Boolean);
+            });
+            const afOtherTypes = computed(() => caseTypes.filter((t) => !afTopTypes.value.includes(t)));
+            const afPickType = (n) => { afDraft.value.type = n; afDraft.value.errMsg = ''; setTimeout(afNext, 120); };
+            const afTopPlaces = computed(() => {
+                const d = afDraft.value; if (!d) return [];
+                const m = {};
+                (allAssistanceRecords.value || []).forEach((r) => (r.cases || []).forEach((c) => {
+                    if (c.district !== d.district || !c.address) return;
+                    const k = c.address.trim(); if (k) m[k] = (m[k] || 0) + 1;
+                }));
+                return Object.keys(m).sort((a, b) => m[b] - m[a]).slice(0, 8);
+            });
+            const afAge = ref(''), afSex = ref('');
+            const afApplyPt = () => {
+                const d = afDraft.value; if (!d) return;
+                afAge.value = String(afAge.value || '').replace(/\D/g, '').slice(0, 3);
+                let rest = d.description || '';
+                const m0 = /^(\d{1,3}歲)?([男女])?(，|$)/.exec(rest);
+                if (m0 && (m0[1] || m0[2])) rest = rest.slice(m0[0].length);
+                const pt = (afAge.value ? afAge.value + '歲' : '') + afSex.value;
+                d.description = pt ? pt + (rest ? '，' + rest : '') : rest;
+            };
+            const afHas = (w) => !!(afDraft.value && (afDraft.value.description || '').includes(w));
+            const afWord = (w, kind) => {
+                const d = afDraft.value; let t = d.description || '';
+                if (t.includes(w)) {
+                    t = t.replace(w, '')
+                        .replace(/([；：])[、，]+/g, '$1').replace(/[、，]+([；])/g, '$1').replace(/([、，])[、，]+/g, '$1')
+                        .replace(/^[，、；]+/, '').replace(/[，、]+$/, '').replace(/；?處置：$/, '').replace(/；$/, '');
+                } else if (kind === 'tx') {
+                    t = t.includes('處置：') ? t + (/：$/.test(t) ? '' : '、') + w : t + (t ? '；' : '') + '處置：' + w;
+                } else {
+                    const i = t.indexOf('；處置：');
+                    const head = i >= 0 ? t.slice(0, i) : (t.startsWith('處置：') ? '' : t), tail = i >= 0 ? t.slice(i) : (t.startsWith('處置：') ? '；' + t : '');
+                    t = head + (head ? '，' : '') + w + tail;
+                }
+                d.description = t;
+            };
             const afBlank = () => ({ startTime: '', endTime: '', district: '板橋區', address: '', type: '', description: '', rescuedCount: 0,
                 errStart: false, errEnd: false, errType: false, errDistrict: false, errAddress: false, errMsg: '', showSuggestions: false, suggestions: [] });
             const afOpen = (idx) => {
@@ -7091,6 +7172,7 @@ const handleTimeInput = (item, field, formType) => {
                 afEditIdx.value = idx;
                 afDraft.value = idx < 0 ? afBlank() : { ...afBlank(), ...JSON.parse(JSON.stringify(f.cases[idx])), errMsg: '', showSuggestions: false, suggestions: [] };
                 afStep.value = 1;
+                { const m0 = /^(\d{1,3})歲([男女]?)/.exec(afDraft.value.description || '') || /^()([男女])(，|$)/.exec(afDraft.value.description || ''); afAge.value = m0 ? m0[1] : ''; afSex.value = m0 ? m0[2] : ''; }
                 nextTick(() => { const el = document.getElementById('afs-start'); if (el && idx < 0) el.focus(); });
             };
             const afT2m = (t) => { const m = /^(\d{2}):(\d{2})$/.exec(t || ''); return m ? +m[1] * 60 + +m[2] : -1; };
@@ -7565,7 +7647,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 openAdminDeleteActivity, adminDeleteableActivities, confirmAdminDeleteAct, executeAdminDeleteAct,isMemberHistoryModalOpen, selectedDutyMember, openMemberDutyHistory, selectedMemberDutyHistory,
                 
                 // 協勤專屬
-                assistanceStep, assistanceForm, afTried, afConfirm, afHours, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
+                assistanceStep, assistanceForm, afTried, afConfirm, afHours, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, afAge, afSex, afApplyPt, afHas, afWord, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
                 isAssistTimeModalOpen, assistTempStart, assistTempEnd, openAssistTimeModal, selectAssistHour, resetAssistTimeSelection, confirmAssistTime, isAssistHourDisabled,
                 activeAssistTab, visibleAssistTabs, assistSlider, assistTabsScrollRef, scrollToAssistTab, onAssistSliderScroll, dynamicMemberHours,displayEmtExpiry,exportPaymentRequestToExcel,
                 myAssistanceRecords, allAssistanceRecords, isAssistEditModalOpen, editingAssistRecord, openAssistEditModal, submitAssistEdit, deleteAssistRecord, handleTimeInput,
