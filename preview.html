@@ -463,6 +463,9 @@
         .nav-me{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transform:translateY(-14px)}
         .nav-me .av{position:relative;width:52px;height:52px;border-radius:26px;background:linear-gradient(135deg,#1d4ed8,#60a5fa);color:#fff;font-size:21px;font-weight:900;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 8px 18px -8px rgba(29,78,216,.7);transition:transform .15s}
         .nav-me .av img,.me-hd .av img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+        .con-page{flex:1;min-height:0;overflow-y:auto;padding:4px 18px calc(120px + var(--safe-bottom))}
+        .con-page::-webkit-scrollbar{display:none}
+        .con-back{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:900;color:#475569;background:#fff;border:1px solid #e2e8f0;padding:7px 12px;border-radius:12px;margin:4px 0 6px}
         .nav-me .av.on{transform:scale(1.06)}
         .nav-me .av i{position:absolute;top:-3px;right:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#ef4444;color:#fff;font-size:10px;font-style:normal;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
         .nav-me .nm{font-size:11px;font-weight:900;color:#1d4ed8;max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1136,9 +1139,17 @@
                         </div>
                     </div>
 
-                    <!-- 推播主控台（僅管理員可見） -->
-                    <div class="slide-page" @scroll="onPageScroll($event, 4)" @touchstart="onPageTouchStart($event)" @touchmove="onPageTouchMove($event)">
-                        <div class="pt-4 pb-24" v-if="isAdmin">
+                    
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 隊員主控台（獨立頁） -->
+        <div v-else-if="currPage === 'console'" class="dashboard-wrapper fade-in">
+            <div class="con-page">
+                <button class="con-back" @click="currPage = mePrevPage || 'dashboard'"><i class="fa-solid fa-arrow-left"></i>返回</button>
+                <div class="pt-4 pb-24" v-if="isAdmin">
 
                             <!-- 標題列 -->
                             <div class="flex justify-between items-center mb-4 px-1">
@@ -1241,9 +1252,6 @@
                             <i class="fa-solid fa-lock text-4xl mb-4"></i>
                             <p class="font-black text-sm">僅限管理員使用</p>
                         </div>
-                    </div>
-
-                </div>
             </div>
         </div>
 
@@ -3180,7 +3188,7 @@
                 <div @click="currPage='dashboard';goDashHome()" :class="currPage === 'dashboard' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-house-chimney text-xl"></i><span class="text-[13px] font-black mt-1">首頁</span></div>
                 <div @click="currPage='schedule';schedView='home'" :class="currPage === 'schedule' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-calendar-days text-xl"></i><span class="text-[13px] font-black mt-1">排班</span></div>
                 <div class="nav-me" @click="meMenu = !meMenu" role="button" aria-label="我的選單">
-                    <span class="av" :class="{ on: meMenu }"><img v-if="meAvatar" :src="meAvatar" referrerpolicy="no-referrer" alt=""><template v-else>{{ userData.姓名?.charAt(0) }}</template><i v-if="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</i></span>
+                    <span class="av" :class="{ on: meMenu || currPage === 'console' }"><img v-if="meAvatar" :src="meAvatar" referrerpolicy="no-referrer" alt="" @error="meAvatarBad = true"><template v-else>{{ userData.姓名?.charAt(0) }}</template><i v-if="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</i></span>
                     <span class="nm">{{ userData.姓名 }}</span>
                 </div>
                 <div @click="currPage='assistance';assistView='home'" :class="currPage === 'assistance' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-truck-medical text-xl"></i><span class="text-[13px] font-black mt-1">協勤</span></div>
@@ -3331,7 +3339,7 @@
 
     <div v-if="meMenu" class="me-bg" @click="meMenu = false"></div>
     <div v-if="meMenu" class="me-pop">
-        <div class="me-hd"><span class="av"><img v-if="meAvatar" :src="meAvatar" referrerpolicy="no-referrer" alt=""><template v-else>{{ userData.姓名?.charAt(0) }}</template></span><div><b>{{ userData.姓名 }}</b><small>{{ currentSquadName ? currentSquadName + '分隊' : '' }}・{{ userData['duty_title'] || '隊員' }}</small></div></div>
+        <div class="me-hd"><span class="av"><img v-if="meAvatar" :src="meAvatar" referrerpolicy="no-referrer" alt="" @error="meAvatarBad = true"><template v-else>{{ userData.姓名?.charAt(0) }}</template></span><div><b>{{ userData.姓名 }}</b><small>{{ currentSquadName ? currentSquadName + '分隊' : '' }}・{{ userData['duty_title'] || '隊員' }}</small></div></div>
         <button v-if="isAdmin" @click="meOpenConsole"><i class="fa-solid fa-satellite-dish"></i>隊員主控台<em class="go">›</em></button>
         <button @click="meMenu = false; openNewsModal()"><i class="fa-solid fa-bell"></i>最新消息<em v-if="unreadCount > 0" class="bd">{{ unreadCount }}</em></button>
         <button @click="hideNums = !hideNums"><i class="fa-solid" :class="hideNums ? 'fa-eye-slash' : 'fa-eye'"></i>隱藏首頁數字<em class="sw" :class="{ on: hideNums }"><i></i></em></button>
@@ -4384,7 +4392,7 @@ const openEmtRecordModal = () => {
                 { id:'adminpush', name:'主控台',   icon:'fa-solid fa-satellite-dish',     activeClass:'bg-slate-800 text-white shadow-md',   textColor:'text-slate-700' },
             ];
 
-            const visibleScheduleTabs = computed(() => isAdmin.value ? scheduleTabs : scheduleTabs.slice(0, 4));
+            const visibleScheduleTabs = computed(() => scheduleTabs.slice(0, 4));
 
             const todayStr = getTodayStr();
             const weekLaterAdminDate = new Date();
@@ -7139,8 +7147,10 @@ const handleTimeInput = (item, field, formType) => {
 
             const afTried = ref(false), afConfirm = ref(false);
             const meMenu = ref(false);
-            const meAvatar = computed(() => (lineProfileRef.value && lineProfileRef.value.picture) || userData.value.line_picture_url || '');
-            const meOpenConsole = () => { meMenu.value = false; currPage.value = 'schedule'; nextTick(() => openSchedTab(visibleScheduleTabs.value.findIndex((t) => t.id === 'adminpush'))); };
+            const meAvatarBad = ref(false);
+            const meAvatar = computed(() => meAvatarBad.value ? '' : ((lineProfileRef.value && lineProfileRef.value.picture) || userData.value.line_picture_url || ''));
+            const mePrevPage = ref('dashboard');
+            const meOpenConsole = () => { meMenu.value = false; if (currPage.value !== 'console') mePrevPage.value = currPage.value; currPage.value = 'console'; };
             const RT_COL = { '急病': '#059669', '路倒': '#d97706', '車禍': '#e11d48', 'OHCA': '#7c3aed', '一般受傷': '#2563eb', '緊急救援': '#ea580c', '車禍救助': '#be123c', '火警待命': '#dc2626' };
             const rtColor = (t) => RT_COL[t] || '#64748b';
             const rtCases = (r) => (r.cases && r.cases.length) ? r.cases : (r.caseType ? [{ caseType: r.caseType, caseStart: r.caseStart, caseEnd: r.caseEnd, rescuedCount: r.rescuedCount, district: r.district, address: r.address, description: r.description }] : []);
@@ -7835,7 +7845,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 openAdminDeleteActivity, adminDeleteableActivities, confirmAdminDeleteAct, executeAdminDeleteAct,isMemberHistoryModalOpen, selectedDutyMember, openMemberDutyHistory, selectedMemberDutyHistory,
                 
                 // 協勤專屬
-                assistanceStep, assistanceForm, afTried, afConfirm, afHours, meMenu, meAvatar, meOpenConsole, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
+                assistanceStep, assistanceForm, afTried, afConfirm, afHours, meMenu, meAvatar, meAvatarBad, meOpenConsole, mePrevPage, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
                 isAssistTimeModalOpen, assistTempStart, assistTempEnd, openAssistTimeModal, selectAssistHour, resetAssistTimeSelection, confirmAssistTime, isAssistHourDisabled,
                 activeAssistTab, visibleAssistTabs, assistSlider, assistTabsScrollRef, scrollToAssistTab, onAssistSliderScroll, dynamicMemberHours,displayEmtExpiry,exportPaymentRequestToExcel,
                 myAssistanceRecords, allAssistanceRecords, isAssistEditModalOpen, editingAssistRecord, openAssistEditModal, submitAssistEdit, deleteAssistRecord, handleTimeInput,
