@@ -22,7 +22,8 @@
             liffId: "2012765865-adJrZdwg",
             workerUrl: "https://haishan-ems-auth.eurekateamstar.workers.dev",
             supabaseUrl: "https://avyexuqgddrpvcwaddaa.supabase.co",
-            supabaseKey: "sb_publishable_qdR5PjP0SZOZG-H1Tn-Llg_G0vEWpfN"
+            supabaseKey: "sb_publishable_qdR5PjP0SZOZG-H1Tn-Llg_G0vEWpfN",
+            isMain: true
         };
         const FCM_VAPID_KEY = "";
         const LINE_WORKER_URL = "";   // LINE 群組通知：之後再加
@@ -3067,9 +3068,9 @@
 
 </div>
 <script type="module">
-    import * as Store from './js/store.js?v=202611281245';
-    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js?v=202611281245';
-    import { startAuth, logout as lineLogout } from './js/auth.js?v=202611281245';
+    import * as Store from './js/store.js?v=202611281445';
+    import { db, collection, doc, query, where, orderBy, limit, onSnapshot, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc } from './js/store.js?v=202611281445';
+    import { startAuth, logout as lineLogout } from './js/auth.js?v=202611281445';
 
     // 舊程式還會呼叫到的 Firebase 名稱，留空殼避免出錯
     const auth = { currentUser: null };
@@ -3178,6 +3179,9 @@
                 binding.value = null;
                 try {
                     const { sb, profile } = await startAuth(window.APP_CONFIG);
+                    // 預覽頁借用這裡的 LINE 登入：?preview=1 → preview.html、?preview=b → preview-b.html
+                    const pv = new URLSearchParams(location.search).get('preview');
+                    if (pv && window.APP_CONFIG.isMain) { location.replace(pv === 'b' ? 'preview-b.html' : 'preview.html'); return; }
                     sbClient = sb;
                     lineProfileRef.value = profile;
                     // 綁定狀態和分隊清單同時讀

@@ -8,6 +8,9 @@ let token = null;       // { access_token, expires_at }
 let profile = null;     // { name, picture }
 let refreshing = null;
 
+// 登入後要回到哪個網址：預設是目前網址；預覽頁會指定回正式首頁（LINE 只接受登記過的網址）
+const loginRedirect = () => (cfg && cfg.loginRedirect ? new URL(cfg.loginRedirect, location.href).href : location.href);
+
 const SKEW = 120; // 到期前 2 分鐘就換新
 const now = () => Math.floor(Date.now() / 1000);
 
@@ -45,7 +48,7 @@ export async function getAccessToken() {
   if (!refreshing) refreshing = exchange().finally(() => { refreshing = null; });
   try { await refreshing; }
   catch (e) {
-    if (e.needLogin) { window.liff.login({ redirectUri: location.href }); await new Promise(() => {}); }
+    if (e.needLogin) { window.liff.login({ redirectUri: loginRedirect() }); await new Promise(() => {}); }
     throw e;
   }
   return token.access_token;
@@ -57,7 +60,7 @@ export async function startAuth(config) {
   if (!window.liff) throw new Error('LIFF SDK 載入失敗，請確認網路後重新整理');
   await window.liff.init({ liffId: cfg.liffId });
   if (!window.liff.isLoggedIn()) {
-    window.liff.login({ redirectUri: location.href });
+    window.liff.login({ redirectUri: loginRedirect() });
     await new Promise(() => {}); // 等待跳轉
   }
   loadCached();
