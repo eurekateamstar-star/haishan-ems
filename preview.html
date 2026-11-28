@@ -410,6 +410,18 @@
         .afs-units span{font-family:Inter,sans-serif;font-size:13px;font-weight:800;color:#64748b;margin-right:2px}
         .afs-units button{all:unset;cursor:pointer;min-width:44px;height:40px;padding:0 10px;box-sizing:border-box;border-radius:11px;background:#1d4ed8;color:#fff;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center}
         .afs-sug b{font-weight:800}
+        .af-r2{display:flex;align-items:stretch;background:#fff;border-radius:18px;border:1px solid #e7eaf0;overflow:hidden;cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,.04),0 10px 22px -18px rgba(15,23,42,.35)}
+        .af-r2.bad{border-color:#fda4af;box-shadow:0 0 0 3px #ffe4e6}
+        .af-r2 .kd{width:64px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 2px;background:color-mix(in srgb,var(--k) 8%,#fff);border-right:1px solid color-mix(in srgb,var(--k) 18%,#fff);color:var(--k)}
+        .af-r2 .kd i{font-size:19px}.af-r2 .kd span{font-size:11px;font-weight:900;text-align:center;line-height:1.2}
+        .af-r2 .md{flex:1;min-width:0;padding:10px 12px}
+        .af-r2 .tm{font-family:Inter,sans-serif;font-size:15px;font-weight:800;color:#0f172a}.af-r2 .tm small{font-family:inherit;font-size:11px;font-weight:700;color:#94a3b8;margin-left:6px}
+        .af-r2 .ad{font-size:12px;font-weight:700;color:#475569;margin-top:3px}
+        .af-r2 .ds{font-size:11px;font-weight:600;color:#64748b;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .af-r2 .e{font-size:11px;font-weight:800;color:#e11d48;margin-top:3px}
+        .af-r2 .rc{width:58px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-left:1px dashed #e2e8f0;position:relative;padding:8px 0}
+        .af-r2 .rc b{font-family:Inter,sans-serif;font-size:26px;font-weight:800;line-height:1;color:#0f172a}.af-r2 .rc span{font-size:10px;font-weight:800;color:#64748b;margin-top:2px}
+        .af-r2 .rc .del{all:unset;cursor:pointer;margin-top:6px;width:28px;height:24px;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:12px}
         .af-sum .row{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:6px 0}
         .af-sum .row span{color:#64748b;font-weight:700}.af-sum .row b{font-weight:900;color:#0f172a;text-align:right}
         .af-sum .cs{border-top:1px solid #f1f3f6;padding:10px 0}
@@ -1355,16 +1367,15 @@
 
                             <div class="af-sec"><span>救護案件<b>{{ assistanceForm.cases.length }}</b></span><small>沒有案件可以不加</small></div>
 
-                            <div v-if="assistanceForm.cases.length" class="af-card" style="padding:4px 14px">
-                                <div v-for="(c, idx) in assistanceForm.cases" :key="idx" :id="'afc-' + idx" class="af-row" :class="{ bad: afCaseBad(c) }" @click="afOpen(idx)">
-                                    <span class="no">{{ idx + 1 }}</span>
-                                    <div class="min-w-0 flex-1">
-                                        <div class="t"><span class="font-num">{{ c.startTime }}–{{ c.endTime }}</span><b>{{ c.type }}</b></div>
-                                        <div class="s">{{ c.district }} {{ c.address }}・救出 {{ c.rescuedCount }} 人<template v-if="c.description">・{{ c.description }}</template></div>
-                                        <div v-if="c.errMsg || afCaseBad(c)" class="e"><i class="fa-solid fa-circle-exclamation"></i> {{ c.errMsg || '有欄位沒填，點這裡修改' }}</div>
-                                    </div>
-                                    <button class="del" @click.stop="assistanceForm.cases.splice(idx, 1)" aria-label="刪除這一件"><i class="fa-solid fa-trash-can"></i></button>
+                            <div v-for="(c, idx) in assistanceForm.cases" :key="idx" :id="'afc-' + idx" class="af-r2" :class="{ bad: afCaseBad(c) }" :style="{ '--k': rtColor(c.type) }" @click="afOpen(idx)">
+                                <div class="kd"><i :class="'fa-solid ' + ((caseTypes.find((t) => t.name === c.type) || {}).icon || 'fa-briefcase-medical')"></i><span>{{ c.type }}</span></div>
+                                <div class="md">
+                                    <div class="tm">{{ c.startTime }} – {{ c.endTime }}<small>第 {{ idx + 1 }} 件</small></div>
+                                    <div class="ad">{{ c.district }} {{ c.address }}</div>
+                                    <div v-if="c.description" class="ds">{{ c.description }}</div>
+                                    <div v-if="c.errMsg || afCaseBad(c)" class="e"><i class="fa-solid fa-circle-exclamation"></i> {{ c.errMsg || '有欄位沒填，點這裡修改' }}</div>
                                 </div>
+                                <div class="rc"><b>{{ c.rescuedCount }}</b><span>救出</span><button class="del" @click.stop="assistanceForm.cases.splice(idx, 1)" aria-label="刪除這一件"><i class="fa-solid fa-trash-can"></i></button></div>
                             </div>
 
                             <button class="af-add" @click="afOpen(-1)"><i class="fa-solid fa-plus"></i>{{ assistanceForm.cases.length ? '再加一件' : '加一件救護案件' }}</button>
