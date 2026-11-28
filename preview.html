@@ -555,6 +555,19 @@
         .ov-chips button,.ov-chips span{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:900;color:#0f172a;background:#f8fafc;border:1px solid #e7eaf0;padding:4px 8px;border-radius:9px}
         .ov-chips button span{all:unset;font-size:11px;font-weight:800;color:#b45309}
         .ov-chips.sm{margin-top:0}.ov-chips.sm span{cursor:default;font-size:11px;padding:3px 7px}.ov-chips.sm span i{font-style:normal;color:#b45309;font-weight:800}.ov-chips.sm .no{color:#cbd5e1;background:none;border:0;padding:0}
+        .ovt-box{overflow:auto;max-height:calc(100vh - 260px);border-radius:14px;border:1px solid #e2e8f0;background:#fff;-webkit-overflow-scrolling:touch}
+        .ovt{border-collapse:separate;border-spacing:0;font-size:12px;min-width:100%}
+        .ovt th,.ovt td{border-right:1px solid #eef1f5;border-bottom:1px solid #eef1f5;text-align:center;white-space:nowrap;padding:7px 8px}
+        .ovt thead th{position:sticky;top:0;z-index:2;font-weight:900;color:#334155;font-size:11px}
+        .ovt thead tr:nth-child(2) th{top:31px;font-size:10px;color:#475569}
+        .ovt .nm{position:sticky;left:0;z-index:1;background:#fff;text-align:left;min-width:64px;box-shadow:1px 0 0 #e2e8f0}
+        .ovt thead .nm{z-index:3;background:#f8fafc}
+        .ovt td.nm b{display:block;font-size:13px;font-weight:900;color:#0f172a}.ovt td.nm small{font-size:10px;font-weight:800;color:#94a3b8}
+        .ovt td{font-family:Inter,sans-serif;font-weight:800;color:#cbd5e1;min-width:44px}
+        .ovt td.got{color:#b45309;background:#fffbeb}
+        .ovt tbody tr{cursor:pointer}.ovt tbody tr:active td{background:#eef3ff}
+        .ovt tfoot td{position:sticky;bottom:0;background:#f8fafc;color:#0f172a;font-weight:900}.ovt tfoot .nm{z-index:3;font-size:12px}
+        .ov-tip{font-size:11px;font-weight:700;color:#94a3b8;text-align:center}
         .ov-none{font-size:12px;font-weight:700;color:#cbd5e1;margin-top:6px}
         .ov-row{display:flex;align-items:center;gap:10px;cursor:pointer}
         .ov-nm{width:70px;flex-shrink:0}.ov-nm b{display:block;font-size:14px;font-weight:900;color:#0f172a}.ov-nm small{font-size:10px;font-weight:800;color:#94a3b8}
@@ -1238,7 +1251,23 @@
                 <div v-if="isAdmin" class="ov-seg"><button v-for="v in ['隊員', '獎章', '證照', '時數']" :key="v" :class="{ on: conView === v }" @click="conView = v">{{ v }}</button></div>
                 <!-- 全員：獎章 -->
                 <div v-if="isAdmin && conView === '獎章'" class="ov-wrap">
-                    <div class="ov-hd"><b>全員獎章</b><span class="ov-tg"><button :class="{ on: ovMedalBy === 'medal' }" @click="ovMedalBy = 'medal'">依獎章</button><button :class="{ on: ovMedalBy === 'person' }" @click="ovMedalBy = 'person'">依人員</button></span></div>
+                    <div class="ov-hd"><b>全員獎章</b><span class="ov-tg"><button :class="{ on: ovMedalBy === 'table' }" @click="ovMedalBy = 'table'">表格</button><button :class="{ on: ovMedalBy === 'medal' }" @click="ovMedalBy = 'medal'">依獎章</button><button :class="{ on: ovMedalBy === 'person' }" @click="ovMedalBy = 'person'">依人員</button></span></div>
+                    <div v-if="ovMedalBy === 'table'" class="ovt-box">
+                        <table class="ovt">
+                            <thead>
+                                <tr><th rowspan="2" class="nm">姓名</th><th v-for="g in OV_GROUPS" :key="g.t" :colspan="g.ids.length" :style="{ background: g.bg }">{{ g.t }}</th></tr>
+                                <tr><th v-for="md in ovMedalCols" :key="md.id" :style="{ background: md.bg }">{{ md.short }}</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="m in ovMembers" :key="m.姓名" @click="memOpen(m)">
+                                    <td class="nm"><b>{{ m.姓名 }}</b><small>{{ m.duty_title }}</small></td>
+                                    <td v-for="md in ovMedalCols" :key="md.id" :class="{ got: ovMedalVal(m, md.id) }">{{ ovMedalVal(m, md.id).replace('年', '') }}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot><tr><td class="nm">共</td><td v-for="md in ovMedalCols" :key="md.id">{{ ovMembers.filter((m) => ovMedalVal(m, md.id)).length }}</td></tr></tfoot>
+                        </table>
+                    </div>
+                    <div v-if="ovMedalBy === 'table'" class="ov-tip">左右滑看全部獎章・數字是民國年・點一列進他的個人編輯</div>
                     <template v-if="ovMedalBy === 'medal'">
                         <section v-for="md in ovMedals" :key="md.id" class="ov-card">
                             <div class="ov-mh"><i :class="md.icon"></i><b>{{ md.label }}</b><small v-if="md.hrs">{{ md.hrs }}</small><em>{{ md.holders.length }} 人</em></div>
@@ -1246,7 +1275,7 @@
                             <div v-else class="ov-none">還沒有人</div>
                         </section>
                     </template>
-                    <template v-else>
+                    <template v-if="ovMedalBy === 'person'">
                         <section v-for="p in ovMedalPeople" :key="p.m.姓名" class="ov-card ov-row" @click="memOpen(p.m)">
                             <div class="ov-nm"><b>{{ p.m.姓名 }}</b><small>{{ p.m.duty_title }}</small></div>
                             <div class="ov-chips sm"><span v-for="x in p.list" :key="x.label">{{ x.label }}<i>{{ x.v }}</i></span><span v-if="!p.list.length" class="no">沒有獎章</span></div>
@@ -7350,9 +7379,14 @@ const handleTimeInput = (item, field, formType) => {
 
             const afTried = ref(false), afConfirm = ref(false);
             const meMenu = ref(false);
-            const conView = ref('隊員'), ovMedalBy = ref('medal'), ovCertFilter = ref('全部');
+            const conView = ref('隊員'), ovMedalBy = ref('table'), ovCertFilter = ref('全部');
             const ovMedalVal = (m, mId) => { const k = Object.keys(m).find((x) => x.startsWith('medal_') && mId.split(/[- \n]+/).every((p) => x.includes(p))); const v = k ? m[k] : ''; return v && v !== '無' ? String(v) : ''; };
             const ovMembers = computed(() => adminMembersData.value.filter((m) => !m.is_suspended));
+            const OV_GROUPS = [{ t: '消防署', ids: ['志工菁英'], bg: '#fef9c3' }, { t: '新北市', ids: ['義消楷模', '績優志工'], bg: '#dcfce7' },
+                { t: '衛福部 志願服務', ids: ['衛福部 金', '衛福部 銀', '衛福部 銅'], bg: '#dbeafe' }, { t: '內政部 志願服務', ids: ['內政部 金', '內政部 銀', '內政部 銅'], bg: '#fae8ff' },
+                { t: '新北市 志願服務', ids: ['新北市 金', '新北市 銀', '新北市 銅'], bg: '#ffedd5' }];
+            const ovMedalCols = OV_GROUPS.flatMap((g) => g.ids.map((id) => { const md = medalList.find((x) => x.id === id) || { name: id };
+                const [a, b] = md.name.split('\n'); return { id, bg: g.bg, short: b ? a.split('-')[1] + ' ' + b.replace('小時', 'H') : a }; }));
             const ovMedals = computed(() => medalList.map((md) => {
                 const [label, hrs] = md.name.split('\n');
                 const holders = ovMembers.value.map((m) => ({ m, v: ovMedalVal(m, md.id) })).filter((x) => x.v).sort((a, b) => parseInt(a.v) - parseInt(b.v));
@@ -8105,7 +8139,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 openAdminDeleteActivity, adminDeleteableActivities, confirmAdminDeleteAct, executeAdminDeleteAct,isMemberHistoryModalOpen, selectedDutyMember, openMemberDutyHistory, selectedMemberDutyHistory,
                 
                 // 協勤專屬
-                assistanceStep, assistanceForm, afTried, afConfirm, afHours, conView, ovMedalBy, ovCertFilter, ovMedals, ovMedalPeople, ovCerts, ovHours, ovHoursMax, meMenu, bindNeedId, meAvatar, meAvatarBad, meOpenConsole, mePrevPage, MEM_TABS, memTab, memSecret, memSecretErr, memOpen, memLeft, memHistKeys, memHistTotal, memHistPct, memSave, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
+                assistanceStep, assistanceForm, afTried, afConfirm, afHours, conView, ovMedalBy, OV_GROUPS, ovMedalCols, ovMedalVal, ovMembers, ovCertFilter, ovMedals, ovMedalPeople, ovCerts, ovHours, ovHoursMax, meMenu, bindNeedId, meAvatar, meAvatarBad, meOpenConsole, mePrevPage, MEM_TABS, memTab, memSecret, memSecretErr, memOpen, memLeft, memHistKeys, memHistTotal, memHistPct, memSave, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
                 isAssistTimeModalOpen, assistTempStart, assistTempEnd, openAssistTimeModal, selectAssistHour, resetAssistTimeSelection, confirmAssistTime, isAssistHourDisabled,
                 activeAssistTab, visibleAssistTabs, assistSlider, assistTabsScrollRef, scrollToAssistTab, onAssistSliderScroll, dynamicMemberHours,displayEmtExpiry,exportPaymentRequestToExcel,
                 myAssistanceRecords, allAssistanceRecords, isAssistEditModalOpen, editingAssistRecord, openAssistEditModal, submitAssistEdit, deleteAssistRecord, handleTimeInput,
