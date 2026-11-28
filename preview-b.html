@@ -266,6 +266,18 @@
         .seg button.on{background:#fff;color:#111827;box-shadow:0 1px 3px rgba(15,23,42,.12)}
         .grp-head{background:#fff!important;border-bottom:1px solid #f1f5f9!important}
 
+        /* ===== 內頁：首頁同款形式 ===== */
+        .pwrap{flex-shrink:0;padding:2px 20px 0}
+        .pwrap .wallet .wcard{top:0}
+        .page-home{flex:1;min-height:0;overflow-y:auto;padding:2px 18px 110px;display:flex;flex-direction:column;gap:12px}
+        .page-home::-webkit-scrollbar{display:none}
+        .pgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+        .pgrid .ftile i{font-size:19px}
+        .plist{background:#fff;border-radius:20px;padding:6px 16px}
+        .plist .row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid #f1f5f9;font-size:14px}
+        .plist .row:first-of-type{border-top:0}
+        .plist .hd{display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px;font-size:14px;font-weight:900}
+
         /* ===== B 版：時間軸風格 ===== */
         html, body, #app, header.bg-\[\#f1f5f9\], .tabs-section{background:#fafaf9!important}
         :root{--header-bg:#fafaf9}
@@ -293,6 +305,7 @@
         .history-gradient{background:linear-gradient(135deg,#115e59,#14b8a6)!important}
         .fund-gradient{background:linear-gradient(135deg,#292524,#1c1917)!important}
         nav .text-blue-600{color:#0f766e!important}
+        .page-home .text-blue-700, .dash-home .text-blue-700{color:#0f766e!important}
         .calendar-cell.today .day-num{background:#0f766e!important}
         .calendar-cell.other-month{background:#f5f5f4!important}
         .slide-page .bg-emerald-500{background:#0f766e!important;box-shadow:none!important}
@@ -655,6 +668,31 @@
 
         <!-- 排班分頁 -->
         <div v-else-if="currPage === 'schedule'" class="dashboard-wrapper fade-in">
+           <div class="pwrap">
+                <div class="wallet" :style="{ height: cardsExpanded ? '196px' : '50px' }">
+                    <div class="wcard w-green" style="top:0">
+                        <svg aria-hidden="true" class="wbg" width="100%" height="100%" viewBox="0 0 354 196" preserveAspectRatio="none"><ellipse cx="300" cy="40" rx="60" ry="36" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="76" ry="47" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="92" ry="58" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="108" ry="69" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="124" ry="80" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="140" ry="91" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="156" ry="102" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="172" ry="113" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="188" ry="124" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="204" ry="135" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="220" ry="146" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="236" ry="157" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="252" ry="168" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="268" ry="179" fill="none" stroke="rgba(255,255,255,0.07)"/></svg><span class="wmark"><svg aria-hidden="true" width="170" height="170" viewBox="0 0 24 24"><g fill="#ffffff"><rect x="9.6" y="1.5" width="4.8" height="21" rx=".6"></rect><rect x="9.6" y="1.5" width="4.8" height="21" rx=".6" transform="rotate(60 12 12)"></rect><rect x="9.6" y="1.5" width="4.8" height="21" rx=".6" transform="rotate(120 12 12)"></rect></g><path d="M12 5.5v13" stroke="rgba(0,0,0,0)" stroke-width="1.1" stroke-linecap="round"></path><path d="M10.6 8c1.8.6 1.8 1.8 0 2.4s-1.8 1.8 0 2.4 1.8 1.8 0 2.4" fill="none" stroke="rgba(0,0,0,0)" stroke-width="1" stroke-linecap="round"></path></svg></span><span class="wsheen"></span>
+                        <div class="wtop"><span class="flex items-center gap-2 min-w-0"><span class="wemb"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg></span><span class="flex flex-col"><span class="wtitle">排班</span><span class="wen">DUTY SCHEDULE</span></span></span><span class="wright" v-if="!cardsExpanded">本週 {{ myWeekShiftCount }} 班</span></div>
+                        <div class="flex items-center justify-between"><div><div class="wlabel">本週我的排班</div><div class="flex items-baseline gap-1"><span class="font-num wemboss" style="font-size:38px;line-height:1">{{ myWeekShiftCount }}</span><span class="text-[13px] font-bold opacity-80">班</span></div></div></div>
+                        <div class="wstats"><div><p>下一班</p><p>{{ nextMyShift || '—' }}</p></div><div><p>近期公差</p><p>{{ upcomingDutyCount }} 場</p></div><div><p>近期會議</p><p>{{ upcomingMeetingCount }} 場</p></div></div>
+                        <button v-if="!cardsExpanded" class="wtap" @click="cardsExpanded = true" aria-label="展開卡片"></button>
+                    </div>
+                </div>
+                <button class="whandle" @click="cardsExpanded = !cardsExpanded" :aria-label="cardsExpanded ? '收合卡片' : '展開卡片'"><span></span>{{ cardsExpanded ? '收合' : '展開' }}</button>
+           </div>
+           <div v-show="schedView === 'home'" class="page-home" @touchstart="onPageTouchStart($event)" @touchmove="onPageTouchMove($event)">
+                <div class="fgrid pgrid">
+                    <button v-for="(tab, index) in visibleScheduleTabs" :key="tab.id" class="fitem" @click="openSchedTab(index)">
+                        <span class="ftile" :style="{ background: tabTint(tab.id) + '14', color: tabTint(tab.id) }"><i :class="tab.icon"></i></span>{{ tab.name }}
+                    </button>
+                </div>
+                <div class="plist">
+                    <div class="hd"><span>本週我的排班</span><button class="text-xs font-bold text-blue-700" @click="openSchedTab(0)">登記 ›</button></div>
+                    <div v-for="day in weekDates.filter(d => isMyShift(d.fullDate))" :key="'h' + day.fullDate" class="row"><span class="font-bold">{{ day.fullDate.slice(5).replace('-', '/') }}（{{ String(day.weekday).replace('週', '') }}）</span><span class="font-num text-blue-700">{{ (userShifts[day.fullDate] || []).filter(s => s.name === userData.姓名).map(s => s.start + '-' + s.end).join('、') }}</span></div>
+                    <p v-if="!weekDates.some(d => isMyShift(d.fullDate))" class="text-[13px] text-slate-400 font-bold pb-2">本週還沒有登記</p>
+                </div>
+           </div>
+
             <div v-if="false" class="cards-section">
                 <div class="px-6 mb-2">
                     <div class="bank-card bg-card-reminder !w-full !min-height-[180px] flex flex-col justify-center relative">
@@ -682,15 +720,16 @@
                 </div>
             </div>
 
-            <div class="tabs-section">
+            <div v-show="schedView !== 'home'" class="tabs-section">
                 <div class="tabs-scroll-container pills" ref="scheduleTabsScrollRef">
-                    <div v-for="(tab, index) in visibleScheduleTabs" :key="tab.id" @click="scrollToScheduleTab(index)" class="tab-item">
+                    <button class="pill-tab" @click="schedView = 'home'; cardsExpanded = true">← 總覽</button>
+                    <div v-for="(tab, index) in visibleScheduleTabs" :key="tab.id" @click="scrollToScheduleTab(index); schedView = tab.id" class="tab-item">
                         <div class="pill-tab" :class="{ active: activeScheduleTab === tab.id }"><i :class="tab.icon"></i>{{ tab.name }}</div>
                     </div>
                 </div>
             </div>
 
-            <div class="slides-section">
+            <div v-show="schedView !== 'home'" class="slides-section">
                 <div class="content-slider" ref="scheduleSlider" @scroll="onScheduleSliderScroll">
                     <!-- 登記排班 -->
                     <div class="slide-page" @scroll="onPageScroll($event, 0)" @touchstart="onPageTouchStart($event)" @touchmove="onPageTouchMove($event)">
@@ -976,14 +1015,35 @@
 
         <!-- 救護頁面：救護手冊、單項技術、藥物小卡 -->
         <div v-else-if="currPage === 'rescue'" class="dashboard-wrapper fade-in">
-            <div class="tabs-section">
+           <div class="pwrap">
+                <div class="wallet" :style="{ height: cardsExpanded ? '196px' : '50px' }">
+                    <div class="wcard w-red" style="top:0">
+                        <svg aria-hidden="true" class="wbg" width="100%" height="100%" viewBox="0 0 354 196" preserveAspectRatio="none"><ellipse cx="300" cy="40" rx="60" ry="36" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="76" ry="47" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="92" ry="58" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="108" ry="69" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="124" ry="80" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="140" ry="91" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="156" ry="102" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="172" ry="113" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="188" ry="124" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="204" ry="135" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="220" ry="146" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="236" ry="157" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="252" ry="168" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="268" ry="179" fill="none" stroke="rgba(255,255,255,0.07)"/></svg><span class="wmark"><svg aria-hidden="true" width="170" height="170" viewBox="0 0 24 24"><g fill="#ffffff"><rect x="9.6" y="1.5" width="4.8" height="21" rx=".6"></rect><rect x="9.6" y="1.5" width="4.8" height="21" rx=".6" transform="rotate(60 12 12)"></rect><rect x="9.6" y="1.5" width="4.8" height="21" rx=".6" transform="rotate(120 12 12)"></rect></g><path d="M12 5.5v13" stroke="rgba(0,0,0,0)" stroke-width="1.1" stroke-linecap="round"></path><path d="M10.6 8c1.8.6 1.8 1.8 0 2.4s-1.8 1.8 0 2.4 1.8 1.8 0 2.4" fill="none" stroke="rgba(0,0,0,0)" stroke-width="1" stroke-linecap="round"></path></svg></span><span class="wsheen"></span>
+                        <div class="wtop"><span class="flex items-center gap-2 min-w-0"><span class="wemb"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24"><g fill="#ffffff"><rect x="9.6" y="1.5" width="4.8" height="21" rx=".6"></rect><rect x="9.6" y="1.5" width="4.8" height="21" rx=".6" transform="rotate(60 12 12)"></rect><rect x="9.6" y="1.5" width="4.8" height="21" rx=".6" transform="rotate(120 12 12)"></rect></g><path d="M12 5.5v13" stroke="#9f1239" stroke-width="1.1" stroke-linecap="round"></path><path d="M10.6 8c1.8.6 1.8 1.8 0 2.4s-1.8 1.8 0 2.4 1.8 1.8 0 2.4" fill="none" stroke="#9f1239" stroke-width="1" stroke-linecap="round"></path></svg></span><span class="flex flex-col"><span class="wtitle">救護</span><span class="wen">EMS FIELD GUIDE</span></span></span><span class="wright" v-if="!cardsExpanded">{{ userData['emt_level'] || 'EMT-1' }}</span></div>
+                        <div class="flex items-center justify-between"><div><div class="wlabel">我的證照</div><div class="flex items-baseline gap-1"><span class="font-num wemboss" style="font-size:38px;line-height:1">{{ userData['emt_level'] || 'EMT-1' }}</span><span class="text-[13px] font-bold opacity-80"></span></div></div><span class="wpill">剩餘 {{ calculateDays(displayEmtExpiry.replace(/\//g, '-')) }} 天</span></div>
+                        <div class="wstats"><div><p>救護手冊</p><p>1140527</p></div><div><p>單項技術</p><p>1140526</p></div><div><p>藥物小卡</p><p>{{ medTotalPages ? medTotalPages + ' 頁' : '—' }}</p></div></div>
+                        <button v-if="!cardsExpanded" class="wtap" @click="cardsExpanded = true" aria-label="展開卡片"></button>
+                    </div>
+                </div>
+                <button class="whandle" @click="cardsExpanded = !cardsExpanded" :aria-label="cardsExpanded ? '收合卡片' : '展開卡片'"><span></span>{{ cardsExpanded ? '收合' : '展開' }}</button>
+           </div>
+           <div v-show="rescueView === 'home'" class="page-home">
+                <div class="fgrid pgrid">
+                    <button v-for="(tab, index) in rescueTabs" :key="tab.id" class="fitem" @click="openRescueTab(index)">
+                        <span class="ftile" :style="{ background: tabTint(tab.id) + '14', color: tabTint(tab.id) }"><i :class="tab.icon"></i></span>{{ tab.name }}
+                    </button>
+                </div>
+           </div>
+
+            <div v-show="rescueView !== 'home'" class="tabs-section">
                 <div class="tabs-scroll-container pills">
-                    <div v-for="tab in rescueTabs" :key="tab.id" @click="activeRescueTab = tab.id" class="tab-item">
+                    <button class="pill-tab" @click="rescueView = 'home'; cardsExpanded = true">← 總覽</button>
+                    <div v-for="tab in rescueTabs" :key="tab.id" @click="activeRescueTab = tab.id; rescueView = tab.id" class="tab-item">
                         <div class="pill-tab" :class="{ active: activeRescueTab === tab.id }"><i :class="tab.icon"></i>{{ tab.name }}</div>
                     </div>
                 </div>
             </div>
-            <div class="rescue-body" @touchstart.passive="onRescueTouchStart" @touchend="onRescueTouchEnd">
+            <div v-show="rescueView !== 'home'" class="rescue-body" @touchstart.passive="onRescueTouchStart" @touchend="onRescueTouchEnd">
                 <div v-show="activeRescueTab === 'manual'" class="fade-in flex flex-col pt-6 px-6">
                     <div class="text-center mb-6">
                         <h2 class="text-lg font-black text-slate-800 tracking-wider">內政部消防署 <span class="text-emerald-500">救護手冊</span></h2>
@@ -1039,17 +1099,43 @@
 
         <!-- 協勤登記頁面 (與 dashboard / schedule 同級切換) -->
         <div v-else-if="currPage === 'assistance'" class="dashboard-wrapper fade-in">
+           <div class="pwrap">
+                <div class="wallet" :style="{ height: cardsExpanded ? '196px' : '50px' }">
+                    <div class="wcard w-blue" style="top:0">
+                        <svg aria-hidden="true" class="wbg" width="100%" height="100%" viewBox="0 0 354 196" preserveAspectRatio="none"><ellipse cx="300" cy="40" rx="60" ry="36" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="76" ry="47" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="92" ry="58" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="108" ry="69" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="124" ry="80" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="140" ry="91" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="156" ry="102" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="172" ry="113" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="188" ry="124" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="204" ry="135" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="220" ry="146" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="236" ry="157" fill="none" stroke="rgba(255,255,255,0.07)"/><ellipse cx="300" cy="40" rx="252" ry="168" fill="none" stroke="rgba(255,255,255,0.045)"/><ellipse cx="300" cy="40" rx="268" ry="179" fill="none" stroke="rgba(255,255,255,0.07)"/></svg><span class="wsheen"></span>
+                        <div class="wtop"><span class="flex items-center gap-2 min-w-0"><span class="wemb"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10H6M8 8v4"/><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.68-.95l-1.93-.64a1 1 0 0 1-.58-.5l-1.54-3.08A1 1 0 0 0 16.38 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg></span><span class="flex flex-col"><span class="wtitle">協勤</span><span class="wen">ASSISTANCE RECORDS</span></span></span><span class="wright" v-if="!cardsExpanded">{{ myHours }} 小時</span></div>
+                        <div class="flex items-center justify-between"><div><div class="wlabel">{{ new Date().getFullYear() }} 年度協勤時數</div><div class="flex items-baseline gap-1"><span class="font-num wemboss" style="font-size:38px;line-height:1">{{ myHours }}</span><span class="text-[13px] font-bold opacity-80">小時</span></div></div></div>
+                        <div class="wstats"><div><p>紀錄筆數</p><p>{{ myYearRecordCount }} 筆</p></div><div><p>出勤次數</p><p>{{ personalYearlyStats.dispatchCount }} 次</p></div><div><p>救出人數</p><p>{{ personalYearlyStats.rescueCount }} 人</p></div></div>
+                        <button v-if="!cardsExpanded" class="wtap" @click="cardsExpanded = true" aria-label="展開卡片"></button>
+                    </div>
+                </div>
+                <button class="whandle" @click="cardsExpanded = !cardsExpanded" :aria-label="cardsExpanded ? '收合卡片' : '展開卡片'"><span></span>{{ cardsExpanded ? '收合' : '展開' }}</button>
+           </div>
+           <div v-show="assistView === 'home'" class="page-home" @touchstart="onPageTouchStart($event)" @touchmove="onPageTouchMove($event)">
+                <div class="fgrid pgrid">
+                    <button v-for="(tab, index) in visibleAssistTabs" :key="tab.id" class="fitem" @click="openAssistTab(index)">
+                        <span class="ftile" :style="{ background: tabTint(tab.id) + '14', color: tabTint(tab.id) }"><i :class="tab.icon"></i></span>{{ tab.name }}
+                    </button>
+                </div>
+                <div class="plist">
+                    <div class="hd"><span>最近紀錄</span><button class="text-xs font-bold text-blue-700" @click="openAssistTab(1)">全部 ›</button></div>
+                    <div v-for="r in recentMyRecords" :key="'rr' + r.id" class="row"><span><span class="font-bold">{{ r.date }}</span><span class="text-slate-500 text-xs ml-2">{{ r.shiftStart }}–{{ r.shiftEnd }}</span></span><span class="text-xs font-bold text-slate-500">{{ (r.cases || []).length ? (r.cases.length + ' 件') : '僅時數' }}</span></div>
+                    <p v-if="!recentMyRecords.length" class="text-[13px] text-slate-400 font-bold pb-2">還沒有紀錄</p>
+                </div>
+           </div>
+
             <!-- 協勤上方 Tabs -->
-            <div class="tabs-section">
+            <div v-show="assistView !== 'home'" class="tabs-section">
                 <div class="tabs-scroll-container pills" ref="assistTabsScrollRef">
-                    <div v-for="(tab, index) in visibleAssistTabs" :key="tab.id" @click="scrollToAssistTab(index)" class="tab-item">
+                    <button class="pill-tab" @click="assistView = 'home'; cardsExpanded = true">← 總覽</button>
+                    <div v-for="(tab, index) in visibleAssistTabs" :key="tab.id" @click="scrollToAssistTab(index); assistView = tab.id" class="tab-item">
                         <div class="pill-tab" :class="{ active: activeAssistTab === tab.id }"><i :class="tab.icon"></i>{{ tab.name }}</div>
                     </div>
                 </div>
             </div>
 
             <!-- 協勤內容 Slider -->
-            <div class="slides-section">
+            <div v-show="assistView !== 'home'" class="slides-section">
                 <div class="content-slider" ref="assistSlider" @scroll="onAssistSliderScroll">
                     
                     <!-- Slide 0: 新增紀錄 (原來的 3 步驟表單) -->
@@ -3141,9 +3227,9 @@
         <nav :style="{ paddingBottom:'var(--safe-bottom)', height:'calc(75px + var(--safe-bottom))' }" class="fixed bottom-0 left-0 right-0 border-t border-slate-200 z-50 bg-white/95 backdrop-blur-md" style="max-width:450px; left:50%; transform:translateX(-50%); width:100%;">
             <div class="flex justify-around items-center h-full px-4">
                 <div @click="currPage='dashboard';goDashHome()" :class="currPage === 'dashboard' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-house-chimney text-xl"></i><span class="text-[13px] font-black mt-1">首頁</span></div>
-                <div @click="currPage='schedule';scrollToScheduleTab(0);expandCards()" :class="currPage === 'schedule' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-calendar-days text-xl"></i><span class="text-[13px] font-black mt-1">排班</span></div>
-                <div @click="currPage='assistance';scrollToAssistTab(0);expandCards()" :class="currPage === 'assistance' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-truck-medical text-xl"></i><span class="text-[13px] font-black mt-1">協勤</span></div>
-                <div @click="currPage='rescue'" :class="currPage === 'rescue' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-briefcase-medical text-xl"></i><span class="text-[13px] font-black mt-1">救護</span></div>
+                <div @click="currPage='schedule';schedView='home';expandCards()" :class="currPage === 'schedule' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-calendar-days text-xl"></i><span class="text-[13px] font-black mt-1">排班</span></div>
+                <div @click="currPage='assistance';assistView='home';expandCards()" :class="currPage === 'assistance' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-truck-medical text-xl"></i><span class="text-[13px] font-black mt-1">協勤</span></div>
+                <div @click="currPage='rescue';rescueView='home';expandCards()" :class="currPage === 'rescue' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-briefcase-medical text-xl"></i><span class="text-[13px] font-black mt-1">救護</span></div>
                 </div>
         </nav>
     </template>
@@ -7222,8 +7308,8 @@ const goToConfirmStep = (onlyShift = false) => {
             ];
             const goDashHome = () => { dashView.value = 'home'; cardsExpanded.value = true; };
             const openDashFunc = (f) => {
-                if (f.id === 'go-schedule') { currPage.value = 'schedule'; scrollToScheduleTab(0); return; }
-                if (f.id === 'go-rescue') { currPage.value = 'rescue'; activeRescueTab.value = 'manual'; return; }
+                if (f.id === 'go-schedule') { currPage.value = 'schedule'; schedView.value = 'home'; cardsExpanded.value = true; return; }
+                if (f.id === 'go-rescue') { currPage.value = 'rescue'; activeRescueTab.value = 'manual'; rescueView.value = 'manual'; cardsExpanded.value = false; return; }
                 const idx = dashboardTabs.findIndex((t) => t.id === f.id);
                 dashView.value = f.id; cardsExpanded.value = false; activeDashboardTab.value = f.id;
                 nextTick(() => {
@@ -7246,7 +7332,37 @@ const goToConfirmStep = (onlyShift = false) => {
 
             const schedSel = ref(getTodayStr());
             const schedSelDay = computed(() => weekDates.value.find((d) => d.fullDate === schedSel.value) || weekDates.value.find((d) => d.isToday) || weekDates.value[0]);
+
+            // ===== 內頁：首頁同款形式 =====
+            const schedView = ref('home'), assistView = ref('home'), rescueView = ref('home');
+            const TAB_TINT = { register: '#2563eb', overview: '#059669', duty_reg: '#e11d48', meeting: '#7c3aed', adminpush: '#334155',
+                new: '#2563eb', history: '#059669', admin_all: '#0891b2', admin_ranking: '#d97706', manual: '#059669', skill: '#ea580c', medication: '#dc2626' };
+            const tabTint = (id) => TAB_TINT[id] || '#2563eb';
+            const openSchedTab = (index) => {
+                const t = visibleScheduleTabs.value[index]; if (!t) return;
+                schedView.value = t.id; cardsExpanded.value = false; activeScheduleTab.value = t.id;
+                nextTick(() => { if (scheduleSlider.value) scheduleSlider.value.scrollTo({ left: scheduleSlider.value.clientWidth * index, behavior: 'auto' }); syncTabScroll(index, scheduleTabsScrollRef.value); });
+            };
+            const openAssistTab = (index) => {
+                const t = visibleAssistTabs.value[index]; if (!t) return;
+                assistView.value = t.id; cardsExpanded.value = false; activeAssistTab.value = t.id;
+                nextTick(() => { if (assistSlider.value) assistSlider.value.scrollTo({ left: assistSlider.value.clientWidth * index, behavior: 'auto' }); syncTabScroll(index, assistTabsScrollRef.value); });
+            };
+            const openRescueTab = (index) => { const t = rescueTabs[index]; if (!t) return; activeRescueTab.value = t.id; rescueView.value = t.id; cardsExpanded.value = false; };
+            const myWeekShiftCount = computed(() => weekDates.value.filter((d) => isMyShift(d.fullDate)).length);
+            const nextMyShift = computed(() => {
+                const today = getTodayStr();
+                const d = Object.keys(userShifts.value).filter((k) => k >= today && isMyShift(k)).sort()[0];
+                if (!d) return '';
+                const s0 = (userShifts.value[d] || []).find((x) => x.name === userData.value?.姓名);
+                return d.slice(5).replace('-', '/') + (s0 ? ' ' + s0.start + '-' + s0.end : '');
+            });
+            const upcomingDutyCount = computed(() => officialTasks.value.filter((t) => (t.date || '') >= getTodayStr()).length);
+            const upcomingMeetingCount = computed(() => meetingTasks.value.filter((t) => (t.date || '') >= getTodayStr()).length);
+            const myYearRecordCount = computed(() => { const y = String(new Date().getFullYear()); return myAssistanceRecords.value.filter((r) => String(r.date || '').startsWith(y)).length; });
+            const recentMyRecords = computed(() => [...myAssistanceRecords.value].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 3));
             return {
+                schedView, assistView, rescueView, tabTint, openSchedTab, openAssistTab, openRescueTab, myWeekShiftCount, nextMyShift, upcomingDutyCount, upcomingMeetingCount, myYearRecordCount, recentMyRecords,
                 schedSel, schedSelDay,
                 UI_ICONS, dashView, walletFront, hideNums, walletOrder, myHours, walletStyle, walletTappable, walletTap, walletRight, dashFuncs, goDashHome, openDashFunc, certReminder, topCases,
                 rescueTabs, activeRescueTab, onRescueTouchStart, onRescueTouchEnd,
