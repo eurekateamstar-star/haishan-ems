@@ -462,6 +462,7 @@
         /* ===== 導覽列中間頭像 ===== */
         .nav-me{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transform:translateY(-14px)}
         .nav-me .av{position:relative;width:52px;height:52px;border-radius:26px;background:linear-gradient(135deg,#1d4ed8,#60a5fa);color:#fff;font-size:21px;font-weight:900;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 8px 18px -8px rgba(29,78,216,.7);transition:transform .15s}
+        .nav-me .av img,.me-hd .av img{width:100%;height:100%;border-radius:50%;object-fit:cover}
         .nav-me .av.on{transform:scale(1.06)}
         .nav-me .av i{position:absolute;top:-3px;right:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#ef4444;color:#fff;font-size:10px;font-style:normal;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
         .nav-me .nm{font-size:11px;font-weight:900;color:#1d4ed8;max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -472,6 +473,7 @@
         .me-hd b{display:block;font-size:16px;font-weight:900;color:#0f172a}.me-hd small{font-size:11px;font-weight:800;color:#1d4ed8}
         .me-pop button,.me-pop .me-row{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:12px;font-size:15px;font-weight:800;color:#0f172a}
         .me-pop button>i,.me-pop .me-row>i{width:18px;text-align:center;color:#64748b}
+        .me-pop .go{margin-left:auto;font-style:normal;color:#cbd5e1;font-size:18px}
         .me-pop .out{color:#e11d48}.me-pop .out>i{color:#e11d48}
         .me-pop .bd{margin-left:auto;font-style:normal;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#ef4444;color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center}
         .me-pop .sw{margin-left:auto;width:38px;height:22px;border-radius:11px;background:#e2e8f0;position:relative;transition:background .2s}
@@ -939,7 +941,7 @@
                 <div class="ptitle pg-green-acc"><span class="pemb g-green"><i class="fa-solid fa-calendar-days"></i></span><div><div class="zh">排班</div><div class="en">DUTY SCHEDULE</div></div><span class="chip">本週 {{ myWeekShiftCount }} 班</span></div>
                 <section class="pcard pstats pg-green-acc" style="--bar:linear-gradient(90deg,#065f46,#10b981)"><div><div class="l">下一班</div><div class="v">{{ nextMyShiftDate || '—' }}<small>{{ nextMyShiftTime }}</small></div></div><div class="tapc" role="button" @click="regSheet = 'duty'"><div class="l">近期公差<i class="fa-solid fa-chevron-right"></i></div><div class="v">{{ upcomingDutyCount }}<small>場</small></div></div><div class="tapc" role="button" @click="regSheet = 'meeting'"><div class="l">近期會議<i class="fa-solid fa-chevron-right"></i></div><div class="v">{{ upcomingMeetingCount }}<small>場</small></div></div></section>
                 <div class="fgrid">
-                    <button v-for="(tab, index) in visibleScheduleTabs" :key="tab.id" class="fitem" @click="openSchedTab(index)">
+                    <button v-show="tab.id !== 'adminpush'" v-for="(tab, index) in visibleScheduleTabs" :key="tab.id" class="fitem" @click="openSchedTab(index)">
                         <span class="ftile" :style="{ background: tabTint(tab.id) + '14', color: tabTint(tab.id) }"><i :class="tab.icon" style="font-size:19px"></i></span>{{ tab.name }}
                     </button>
                 </div>
@@ -985,7 +987,7 @@
             <div v-show="schedView !== 'home'" class="tabs-section">
                 <div class="tabs-scroll-container pills" ref="scheduleTabsScrollRef">
                     <button class="pill-tab" @click="schedView = 'home'">← 總覽</button>
-                    <div v-for="(tab, index) in visibleScheduleTabs" :key="tab.id" @click="scrollToScheduleTab(index); schedView = tab.id" class="tab-item">
+                    <div v-show="tab.id !== 'adminpush'" v-for="(tab, index) in visibleScheduleTabs" :key="tab.id" @click="scrollToScheduleTab(index); schedView = tab.id" class="tab-item">
                         <div class="pill-tab" :class="{ active: activeScheduleTab === tab.id }"><i :class="tab.icon"></i>{{ tab.name }}</div>
                     </div>
                 </div>
@@ -3178,7 +3180,7 @@
                 <div @click="currPage='dashboard';goDashHome()" :class="currPage === 'dashboard' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-house-chimney text-xl"></i><span class="text-[13px] font-black mt-1">首頁</span></div>
                 <div @click="currPage='schedule';schedView='home'" :class="currPage === 'schedule' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-calendar-days text-xl"></i><span class="text-[13px] font-black mt-1">排班</span></div>
                 <div class="nav-me" @click="meMenu = !meMenu" role="button" aria-label="我的選單">
-                    <span class="av" :class="{ on: meMenu }">{{ userData.姓名?.charAt(0) }}<i v-if="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</i></span>
+                    <span class="av" :class="{ on: meMenu }"><img v-if="meAvatar" :src="meAvatar" referrerpolicy="no-referrer" alt=""><template v-else>{{ userData.姓名?.charAt(0) }}</template><i v-if="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</i></span>
                     <span class="nm">{{ userData.姓名 }}</span>
                 </div>
                 <div @click="currPage='assistance';assistView='home'" :class="currPage === 'assistance' ? 'text-blue-600' : 'text-slate-300'" class="nav-item cursor-pointer"><i class="fa-solid fa-truck-medical text-xl"></i><span class="text-[13px] font-black mt-1">協勤</span></div>
@@ -3329,7 +3331,8 @@
 
     <div v-if="meMenu" class="me-bg" @click="meMenu = false"></div>
     <div v-if="meMenu" class="me-pop">
-        <div class="me-hd"><span class="av">{{ userData.姓名?.charAt(0) }}</span><div><b>{{ userData.姓名 }}</b><small>{{ currentSquadName ? currentSquadName + '分隊' : '' }}・{{ userData['duty_title'] || '隊員' }}</small></div></div>
+        <div class="me-hd"><span class="av"><img v-if="meAvatar" :src="meAvatar" referrerpolicy="no-referrer" alt=""><template v-else>{{ userData.姓名?.charAt(0) }}</template></span><div><b>{{ userData.姓名 }}</b><small>{{ currentSquadName ? currentSquadName + '分隊' : '' }}・{{ userData['duty_title'] || '隊員' }}</small></div></div>
+        <button v-if="isAdmin" @click="meOpenConsole"><i class="fa-solid fa-satellite-dish"></i>隊員主控台<em class="go">›</em></button>
         <button @click="meMenu = false; openNewsModal()"><i class="fa-solid fa-bell"></i>最新消息<em v-if="unreadCount > 0" class="bd">{{ unreadCount }}</em></button>
         <button @click="hideNums = !hideNums"><i class="fa-solid" :class="hideNums ? 'fa-eye-slash' : 'fa-eye'"></i>隱藏首頁數字<em class="sw" :class="{ on: hideNums }"><i></i></em></button>
         <label v-if="isSuperAdmin" class="me-row"><i class="fa-solid fa-right-left"></i>切換分隊
@@ -7136,6 +7139,8 @@ const handleTimeInput = (item, field, formType) => {
 
             const afTried = ref(false), afConfirm = ref(false);
             const meMenu = ref(false);
+            const meAvatar = computed(() => (lineProfileRef.value && lineProfileRef.value.picture) || userData.value.line_picture_url || '');
+            const meOpenConsole = () => { meMenu.value = false; currPage.value = 'schedule'; nextTick(() => openSchedTab(visibleScheduleTabs.value.findIndex((t) => t.id === 'adminpush'))); };
             const RT_COL = { '急病': '#059669', '路倒': '#d97706', '車禍': '#e11d48', 'OHCA': '#7c3aed', '一般受傷': '#2563eb', '緊急救援': '#ea580c', '車禍救助': '#be123c', '火警待命': '#dc2626' };
             const rtColor = (t) => RT_COL[t] || '#64748b';
             const rtCases = (r) => (r.cases && r.cases.length) ? r.cases : (r.caseType ? [{ caseType: r.caseType, caseStart: r.caseStart, caseEnd: r.caseEnd, rescuedCount: r.rescuedCount, district: r.district, address: r.address, description: r.description }] : []);
@@ -7830,7 +7835,7 @@ const goToConfirmStep = (onlyShift = false) => {
                 openAdminDeleteActivity, adminDeleteableActivities, confirmAdminDeleteAct, executeAdminDeleteAct,isMemberHistoryModalOpen, selectedDutyMember, openMemberDutyHistory, selectedMemberDutyHistory,
                 
                 // 協勤專屬
-                assistanceStep, assistanceForm, afTried, afConfirm, afHours, meMenu, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
+                assistanceStep, assistanceForm, afTried, afConfirm, afHours, meMenu, meAvatar, meOpenConsole, afEditId, afEditOwner, afEditRecord, afCancelEdit, allAssistByMonth, rtColor, rtCases, myAssistByMonth, AF_ALL_DIST, AF_ACTS, afAct, rtActColor, afCaseBad, afAddCase, afDraft, afEditIdx, afStep, afOpen, afTime, afNext, AF_SX, AF_TX, afTopTypes, afOtherTypes, afPickType, afTopPlaces, AF_MAIN_DIST, afOtherDists, afDistMore, afSmart, afPickRoad, afAppend, AF_DOOR, afAddr, afStSug, afComposeAddr, afSetAddr, afClearDoor, afAddrSug, afTopStreets, afQaOpen, afQa, afQaText, afMined, afToggle, afQaDone, afSubmit, afDoSubmit, goToAddCase, addCase, removeCase, goToConfirmStep, submitAssistanceToFirebase, myAssistSearchQuery, myAssistFilterYear, myAssistFilterMonth, filteredMyAssistanceRecords,
                 isAssistTimeModalOpen, assistTempStart, assistTempEnd, openAssistTimeModal, selectAssistHour, resetAssistTimeSelection, confirmAssistTime, isAssistHourDisabled,
                 activeAssistTab, visibleAssistTabs, assistSlider, assistTabsScrollRef, scrollToAssistTab, onAssistSliderScroll, dynamicMemberHours,displayEmtExpiry,exportPaymentRequestToExcel,
                 myAssistanceRecords, allAssistanceRecords, isAssistEditModalOpen, editingAssistRecord, openAssistEditModal, submitAssistEdit, deleteAssistRecord, handleTimeInput,
